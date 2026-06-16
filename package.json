@@ -1,0 +1,14 @@
+{
+  "name": "zap-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "cli:build": "npm run build --workspace=zap-git",
+    "cli:test": "npm test --workspace=zap-git",
+    "web:dev": "npm run dev --workspace=zap-dashboard",
+    "web:build": "npm run build --workspace=zap-dashboard"
+  }
+}

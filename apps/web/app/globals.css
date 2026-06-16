@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+/*
+  Labil Grotesk Variable is a licensed display/body face. Drop the variable
+  font file(s) into /public/fonts and uncomment the @font-face block below.
+  Until then, the stack below falls back to a faithful system grotesk.
+*/
+/*
+@font-face {
+  font-family: "Labil Grotesk Variable";
+  src: url("/fonts/LabilGrotesk-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+*/
+
+@theme {
+  /* ---- Color tokens ---- */
+  --color-canvas: #09090b; /* background primary, zinc-950 */
+  --color-surface: #111113; /* card surfaces */
+  --color-surface-elevated: #1a1a1e; /* hover states, modals */
+  --color-border: #27272a; /* zinc-800 */
+  --color-border-strong: #3f3f46; /* zinc-700 */
+
+  --color-brand: #6ee7b7; /* emerald-300, zap green */
+  --color-success: #4ade80; /* green-400 */
+  --color-warning: #facc15; /* yellow-400 */
+  --color-danger: #f87171; /* red-400 */
+  --color-info: #60a5fa; /* blue-400 */
+
+  --color-fg: #fafafa; /* text primary, zinc-50 */
+  --color-fg-muted: #a1a1aa; /* text secondary, zinc-400 */
+  --color-fg-subtle: #52525b; /* text muted, zinc-600 */
+
+  /* ---- Typography ---- */
+  --font-display: "Labil Grotesk Variable", "Inter", Arial, sans-serif;
+  --font-body: "Labil Grotesk Variable", "Inter", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* ---- Radius ---- */
+  --radius-card: 0.75rem; /* 12px, rounded-xl */
+  --radius-input: 0.5rem; /* 8px, rounded-lg */
+
+  /* ---- Motion ---- */
+  --ease-zap: cubic-bezier(0.16, 1, 0.3, 1); /* ease-out */
+}
+
+/* Non-color tokens that intentionally don't generate utilities */
+:root {
+  --brand-glow: rgba(110, 231, 183, 0.12);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-fg);
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: var(--brand-glow);
+    color: var(--color-fg);
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+  }
+
+  /* Display headings: tight tracking, heavy weight */
+  h1,
+  h2,
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  /* Section / card titles */
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+
+  /* Eyebrow / caps labels */
+  .label-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-fg-subtle);
+  }
+
+  /* Default focus ring, accessible and on-brand */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Subtle radial halo using the brand glow token */
+  .glow-brand {
+    background: radial-gradient(circle at center, var(--brand-glow), transparent 70%);
+  }
+
+  /* The zap signature: an electric underline that pulses on hover */
+  .zap-underline {
+    position: relative;
+    display: inline-block;
+  }
+
+  .zap-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 2px;
+    background: var(--color-brand);
+    opacity: 0.5;
+    transform: scaleX(0.96);
+    transform-origin: left;
+    transition: opacity 0.2s var(--ease-zap), transform 0.2s var(--ease-zap);
+  }
+
+  .zap-underline:hover::after,
+  .zap-underline:focus-visible::after {
+    opacity: 1;
+    animation: zap-pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes zap-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 var(--brand-glow);
+    }
+    50% {
+      box-shadow: 0 0 8px 1px var(--brand-glow);
+    }
+  }
+
+  /* Page transition primitive used by (dashboard) layout */
+  .page-enter {
+    animation: page-enter 0.2s var(--ease-zap);
+  }
+
+  @keyframes page-enter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .zap-underline:hover::after,
+  .zap-underline:focus-visible::after {
+    animation: none;
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "zap-git",
+  "version": "0.1.0",
+  "description": "Replace your entire git push workflow with one command: zap.",
+  "author": "gaurav",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nextgengk/zap-cli"
+  },
+  "keywords": [
+    "git",
+    "cli",
+    "workflow",
+    "zap"
+  ],
+  "type": "module",
+  "bin": {
+    "zap": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "start": "node dist/index.js",
+    "test": "node --test dist/test/**/*.test.js"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.7.0",
+    "@supabase/supabase-js": "^2.45.4",
+    "axios": "^1.7.7",
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "conf": "^13.0.1",
+    "dotenv": "^16.4.5",
+    "execa": "^9.4.0",
+    "groq-sdk": "^1.2.1",
+    "ora": "^8.1.0",
+    "simple-git": "^3.27.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.6.3"
+  },
+  "license": "MIT"
+}

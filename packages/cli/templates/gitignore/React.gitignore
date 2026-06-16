@@ -1,0 +1,10 @@
+# Production build
+/build
+/dist
+
+# Vite
+.vite/
+*.local
+
+# Testing
+/coverage

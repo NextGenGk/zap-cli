@@ -1,0 +1,22 @@
+# Compiled output
+*.class
+target/
+build/
+out/
+
+# Gradle
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Logs
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
