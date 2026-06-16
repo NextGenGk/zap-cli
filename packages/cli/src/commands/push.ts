@@ -251,24 +251,20 @@ async function runAiFlow(
         generated = { message: result.message, tokensUsed: 0 };
       } catch (err) {
         const reason = err instanceof DashboardAiError ? err.reason : "api-error";
-        if (reason === "no-server-key" && groqApiKey) {
-          // Fall through silently to the local Groq key below.
-        } else {
-          failureHint =
-            reason === "no-server-key"
-              ? "AI commit messages aren't enabled on this dashboard yet."
-              : reason === "empty-diff"
-                ? "No diff content to summarize."
-                : "Falling back to manual message prompt.";
-        }
+        failureHint =
+          reason === "no-server-key"
+            ? "AI commit messages aren't enabled on this dashboard yet."
+            : reason === "empty-diff"
+              ? "No diff content to summarize."
+              : "Falling back to manual message prompt.";
       }
     }
 
-    if (!generated && groqApiKey && (!creds || failureHint === null)) {
+    if (!generated && groqApiKey) {
       try {
         const result = await generateCommitMessage(diff, groqApiKey);
         generated = { message: result.message, tokensUsed: result.tokensUsed };
-        failureHint = null;
+        failureHint = null; // Successfully generated with local key
       } catch (err) {
         const reason = err instanceof AiCommitError ? err.reason : "api-error";
         failureHint =
