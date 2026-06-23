@@ -1,18 +1,9 @@
-import axios from "axios";
-
 export const NVIDIA_API_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 export const NVIDIA_MODEL = "google/gemma-4-31b-it";
 
 const REQUEST_TIMEOUT_MS = 12_000;
 const MAX_DIFF_CHARS = 6000;
 
-/**
- * System prompt for generating commit messages. Optimized for accuracy:
- * the model is told exactly what signals to look at (file paths, added vs.
- * removed lines, hunk headers) and is given concrete good/bad examples so
- * it produces a message that describes *what changed*, not a generic
- * restatement of the file list.
- */
 export const COMMIT_MESSAGE_SYSTEM_PROMPT = `You are an expert software engineer writing a git commit message for the exact diff provided below.
 
 Read the diff carefully:
@@ -52,11 +43,6 @@ export interface AiCommitResult {
   model: string;
 }
 
-/**
- * Generates a Conventional Commits message from a git diff using the
- * platform's NVIDIA NIM key (server-side only — the CLI/user never sees or
- * needs this key).
- */
 export async function generateCommitMessageServerSide(diff: string): Promise<AiCommitResult> {
   const apiKey = process.env.NVIDIA_API_KEY;
   if (!apiKey) {
@@ -68,10 +54,18 @@ export async function generateCommitMessageServerSide(diff: string): Promise<AiC
     throw new AiCommitError("No diff content to summarize", "empty-diff");
   }
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
   try {
-    const response = await axios.post(
-      NVIDIA_API_URL,
-      {
+    const response = await fetch(NVIDIA_API_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         model: NVIDIA_MODEL,
         messages: [
           { role: "system", content: COMMIT_MESSAGE_SYSTEM_PROMPT },
@@ -82,21 +76,17 @@ export async function generateCommitMessageServerSide(diff: string): Promise<AiC
         top_p: 0.9,
         stream: false,
         chat_template_kwargs: { enable_thinking: true },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        timeout: REQUEST_TIMEOUT_MS,
-      }
-    );
+      }),
+      signal: controller.signal,
+    });
 
-    const raw: string = response.data?.choices?.[0]?.message?.content ?? "";
+    if (!response.ok) {
+      throw new AiCommitError(`NVIDIA NIM request failed: ${response.status} ${response.statusText}`, "api-error");
+    }
 
-    // Strip any <think>...</think> block Gemma may prepend in thinking mode,
-    // plus surrounding quotes/backticks/code fences the model sometimes adds.
+    const data = await response.json();
+    const raw: string = data?.choices?.[0]?.message?.content ?? "";
+
     const cleaned = raw.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
     const message = cleaned
       .replace(/^```[a-z]*\n?/i, "")
@@ -110,13 +100,15 @@ export async function generateCommitMessageServerSide(diff: string): Promise<AiC
       throw new AiCommitError("Empty response from model", "api-error");
     }
 
-    const tokensUsed: number = response.data?.usage?.total_tokens ?? 0;
+    const tokensUsed: number = data?.usage?.total_tokens ?? 0;
     return { message, tokensUsed, model: NVIDIA_MODEL };
   } catch (err) {
     if (err instanceof AiCommitError) throw err;
-    if (axios.isAxiosError(err) && (err.code === "ECONNABORTED" || err.code === "ETIMEDOUT")) {
+    if ((err as Error).name === "AbortError") {
       throw new AiCommitError("NVIDIA NIM request timed out", "timeout");
     }
     throw new AiCommitError(`NVIDIA NIM request failed: ${(err as Error).message}`, "api-error");
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
