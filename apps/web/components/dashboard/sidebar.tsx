@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   SquaresFour,
@@ -9,7 +10,6 @@ import {
   Gear,
   SignOut,
 } from "@phosphor-icons/react/dist/ssr";
-import { ZapMark } from "@/components/marketing/zap-mark";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/app/(auth)/actions";
 
@@ -25,9 +25,9 @@ export function Sidebar({ email }: { email?: string | null }) {
 
   return (
     <aside className="sticky top-0 flex h-screen shrink-0 w-60 flex-col border-r border-border bg-surface px-4 py-5">
-      <Link href="/dashboard" className="mb-8 flex items-center gap-2 px-2">
-        <ZapMark size={20} animated={false} />
-        <span className="font-display text-lg font-bold text-fg">zap</span>
+      <Link href="/dashboard" className="mb-8 flex items-center gap-2.5 px-2">
+        <Image src="/zap.svg" alt="Zap Logo" width={28} height={28} />
+        <span className="font-display text-lg font-bold tracking-widest text-fg">ZAP</span>
       </Link>
 
       <nav className="flex flex-1 flex-col gap-1">

@@ -18,11 +18,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <body className={`bg-canvas text-fg antialiased ${phudu.variable}`}>
-        {/* Global frame borders */}
-        <div className="pointer-events-none fixed inset-y-0 left-0 right-0 z-50 flex justify-center px-6 hidden md:flex">
-          <div className="w-full max-w-[1200px] border-x border-dashed border-border/80" />
-        </div>
-        
         {children}
         <Toaster
           theme="dark"

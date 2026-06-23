@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   const { error } = await supabase.from("ai_usage").insert({
     user_id: auth.userId,
     tokens_used: tokensUsed,
-    model: typeof body.model === "string" ? body.model : "openai/gpt-oss-120b",
+    model: typeof body.model === "string" ? body.model : "default",
   });
 
   if (error) {

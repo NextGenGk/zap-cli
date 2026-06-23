@@ -25,7 +25,7 @@ export function TokenUsageChart({ data }: { data: AiUsagePoint[] }) {
     <Card>
       <CardHeader>
         <CardTitle>Token usage</CardTitle>
-        <CardDescription>Last 14 days · Groq (openai/gpt-oss-120b)</CardDescription>
+        <CardDescription>Last 14 days</CardDescription>
       </CardHeader>
       <CardContent className="h-72">
         <ResponsiveContainer width="100%" height="100%">

@@ -21,7 +21,7 @@ export default async function AiUsagePage() {
 
   return (
     <div className="flex flex-col">
-      <Topbar title="AI usage" description="How much zap --ai has done for you, powered by Groq (llama-3.1-8b-instant)." />
+      <Topbar title="AI usage" description="How much zap --ai has done for you." />
 
       <div className="flex flex-col gap-6 p-8">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -36,7 +36,7 @@ export default async function AiUsagePage() {
         <Card>
           <CardHeader>
             <CardTitle>Recent AI-generated commits</CardTitle>
-            <CardDescription>Messages written by Groq from your diffs</CardDescription>
+            <CardDescription>Messages written by AI from your diffs</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             <PushTable

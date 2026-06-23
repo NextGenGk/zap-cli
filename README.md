@@ -3,7 +3,7 @@
 **Push code. Just type `zap`.**
 
 A two-part product:
-- **CLI** (`packages/cli`) — replaces `git add + git commit + git push` with one command, plus AI commit messages powered by the zap dashboard's NVIDIA NIM integration.
+- **CLI** (`packages/cli`) — replaces `git add + git commit + git push` with one command, plus AI commit messages powered by the zap dashboard.
 - **Dashboard** (`apps/web`) — Next.js SaaS app: push history, AI usage analytics, API key management, and team settings.
 
 ---
@@ -14,18 +14,18 @@ A two-part product:
 
 1. Create a free Supabase project at [supabase.com](https://supabase.com)
 2. Run `supabase/schema.sql` in your Supabase SQL editor
-3. Copy `apps/web/.env.example` → `apps/web/.env.local` and fill in your Supabase keys + `NVIDIA_API_KEY`
-4. Deploy or run locally:
+3. Copy `apps/web/.env.example` → `apps/web/.env.local` and fill in your Supabase keys + API keys
+4. Deploy to Vercel or run locally:
 
 ```bash
 cd apps/web
 npm install
-npm run dev        # http://localhost:3000
+npm run dev
 ```
 
 ### 2. Sign up
 
-Open `http://localhost:3000` → **Get started** → create an account. The app sends a confirmation email (or logs straight in if email confirmation is disabled in your Supabase settings).
+Open your deployed dashboard → **Get started** → create an account.
 
 ### 3. Connect the CLI
 
@@ -34,7 +34,7 @@ Go to **Settings → API Keys → New key**, copy the key, then in any git repo:
 ```bash
 npm install -g zap-git
 zap init
-# Dashboard URL: http://localhost:3000
+# Dashboard URL: <your deployed URL>
 # API key: <paste from Settings>
 ```
 
@@ -42,7 +42,7 @@ zap init
 
 ```bash
 zap                 # smart commit message + push
-zap --ai            # AI-generated commit message (Gemma 4 via NVIDIA NIM)
+zap --ai            # AI-generated commit message
 zap --dry-run       # preview the whole flow, nothing committed/pushed
 zap --undo          # soft-reset the last commit, keep changes staged
 zap log             # view push history
@@ -75,7 +75,7 @@ When you try to push to `main` or `master`, zap warns you and offers to:
 
 ### AI commit messages
 
-`zap --ai` reads your staged diff and sends it to the zap dashboard's `/api/ai/commit-message` endpoint, which uses the platform's own **Groq** key (`openai/gpt-oss-120b`). Users never need their own AI provider key.
+`zap --ai` reads your staged diff and sends it to the zap dashboard's `/api/ai/commit-message` endpoint. Users never need their own AI provider key.
 
 The prompt is tuned for accuracy: it reads specific function/class names, file paths, and diff hunks to produce a message like `feat(auth): add OTP verification to login` rather than a generic `chore: update files`.
 
@@ -126,11 +126,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 # Service role key — server-only, never exposed to client
 SUPABASE_SERVICE_ROLE_KEY=
 
-# Platform's NVIDIA NIM key — powers zap --ai for all users
-NVIDIA_API_KEY=
+# AI API key — powers zap --ai for all users
+AI_API_KEY=
 
 # Base URL of this deployment
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=https://your-domain.vercel.app
 ```
 
 ### CLI env vars (override stored config)
@@ -138,7 +138,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```env
 ZAP_API_KEY=          # your dashboard API key
 ZAP_SUPABASE_URL=     # dashboard base URL
-NVIDIA_API_KEY=       # optional self-hosted AI key (falls back after dashboard proxy)
+AI_API_KEY=           # optional self-hosted AI key (falls back after dashboard proxy)
 ```
 
 ---
@@ -153,7 +153,7 @@ User runs: zap --ai
     │       Bearer: <api_key>
     │   Dashboard:
     │       1. Hashes key, looks up in api_keys (service role)
-    │       2. Calls NVIDIA NIM with platform key (NVIDIA_API_KEY)
+    │       2. Calls AI with platform key
     │       3. Returns { message, tokens_used, model }
     │       4. Writes ai_usage row for the dashboard's AI page
     │
