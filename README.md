@@ -75,13 +75,13 @@ When you try to push to `main` or `master`, zap warns you and offers to:
 
 ### AI commit messages
 
-`zap --ai` reads your staged diff and sends it to the zap dashboard's `/api/ai/commit-message` endpoint, which uses the platform's own **NVIDIA NIM (Gemma 4 31B)** key. Users never need their own AI provider key.
+`zap --ai` reads your staged diff and sends it to the zap dashboard's `/api/ai/commit-message` endpoint, which uses the platform's own **Groq** key (`openai/gpt-oss-120b`). Users never need their own AI provider key.
 
 The prompt is tuned for accuracy: it reads specific function/class names, file paths, and diff hunks to produce a message like `feat(auth): add OTP verification to login` rather than a generic `chore: update files`.
 
 Fallback chain if AI is unavailable:
 1. Dashboard proxy (primary — SaaS path)
-2. `NVIDIA_API_KEY` env var (self-hosted override)
+2. `GROQ_API_KEY` env var (self-hosted override)
 3. Heuristic message from changed file names (always works offline)
 
 ### .gitignore auto-generation

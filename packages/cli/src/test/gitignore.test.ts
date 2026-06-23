@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, rmSync, writeFileSync, existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { detectProjectTypes, generateGitignore, ensureGitignore } from "../lib/gitignore.js";
+import { detectProjectTypes, generateGitignore, ensureOrUpdateGitignore } from "../lib/gitignore.js";
 
 function tmpDir(): string {
   return mkdtempSync(join(tmpdir(), "zap-gitignore-test-"));
@@ -83,12 +83,12 @@ describe("gitignore generation", () => {
   });
 });
 
-describe("ensureGitignore", () => {
-  test("creates a .gitignore when none exists", () => {
+describe("ensureOrUpdateGitignore", () => {
+  test("creates a .gitignore when none exists", async () => {
     const dir = tmpDir();
     writeFileSync(join(dir, "package.json"), JSON.stringify({ name: "x", dependencies: { next: "15.0.0" } }));
 
-    const result = ensureGitignore(dir);
+    const result = await ensureOrUpdateGitignore(dir);
     assert.equal(result.created, true);
     assert.ok(existsSync(join(dir, ".gitignore")));
     assert.deepEqual(result.types, ["Node", "Nextjs"]);
@@ -96,13 +96,39 @@ describe("ensureGitignore", () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  test("does not overwrite an existing .gitignore", () => {
+  test("appends missing patterns to existing .gitignore", async () => {
     const dir = tmpDir();
     writeFileSync(join(dir, ".gitignore"), "custom-ignore\n");
 
-    const result = ensureGitignore(dir);
+    const result = await ensureOrUpdateGitignore(dir);
     assert.equal(result.created, false);
-    assert.equal(readFileSync(join(dir, ".gitignore"), "utf-8"), "custom-ignore\n");
+    assert.ok(result.addedLines.length > 0);
+    const content = readFileSync(join(dir, ".gitignore"), "utf-8");
+    assert.match(content, /custom-ignore/);
+    assert.match(content, /node_modules\//);
+    assert.match(content, /\.env/);
+
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  test("skips if all patterns already present", async () => {
+    const dir = tmpDir();
+    const existing = [
+      ".DS_Store", "Thumbs.db", "*.swp", "*.swo", "*~",
+      ".idea/", ".vscode/", "*.sublime-workspace", "*.sublime-project",
+      ".vs/", "*.suo", "*.ntvs_*",
+      ".env", ".env.local", ".env.*.local", ".env.production", ".env.development", ".env.test",
+      "*.log", "npm-debug.log*", "yarn-debug.log*", "yarn-error.log*", "pnpm-debug.log*",
+      "node_modules/", ".pnp", ".pnp.js",
+      ".yarn/cache", ".yarn/unplugged", ".yarn/build-state.yml", ".yarn/install-state.gz",
+      "dist/", "build/", "*.tsbuildinfo",
+      "*.pid", "*.seed", "*.pid.lock",
+    ].join("\n") + "\n";
+    writeFileSync(join(dir, ".gitignore"), existing);
+
+    const result = await ensureOrUpdateGitignore(dir);
+    assert.equal(result.created, false);
+    assert.equal(result.addedLines.length, 0);
 
     rmSync(dir, { recursive: true, force: true });
   });

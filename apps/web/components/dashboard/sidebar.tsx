@@ -24,7 +24,7 @@ export function Sidebar({ email }: { email?: string | null }) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-full w-60 flex-col border-r border-border bg-surface px-4 py-5">
+    <aside className="sticky top-0 flex h-screen shrink-0 w-60 flex-col border-r border-border bg-surface px-4 py-5">
       <Link href="/dashboard" className="mb-8 flex items-center gap-2 px-2">
         <ZapMark size={20} animated={false} />
         <span className="font-display text-lg font-bold text-fg">zap</span>

@@ -1,12 +1,13 @@
 import {
   isGitRepo,
+  initRepo,
   getGitUserConfig,
   setGitUserConfig,
   getRemoteUrl,
   addRemote,
   remoteUrlToHttps,
 } from "../lib/git.js";
-import { ensureGitignore } from "../lib/gitignore.js";
+import { ensureOrUpdateGitignore } from "../lib/gitignore.js";
 import { getConfig, setConfigValue } from "../lib/config.js";
 import { verifyApiKey } from "../lib/supabase.js";
 import * as out from "../ui/output.js";
@@ -18,9 +19,15 @@ export async function initCommand(): Promise<void> {
   ui.intro(out.brand("⚡ zap init"));
 
   if (!(await isGitRepo(cwd))) {
-    console.log(out.errorBlock("Not a git repository", "Run git init first, then zap init."));
-    process.exitCode = 1;
-    return;
+    ui.log.message(out.info("This directory is not a git repository yet."));
+    const wantsInit = await ui.confirm("Initialize a git repository here?", true);
+    if (!wantsInit) {
+      console.log(out.errorBlock("Not a git repository", "Run git init first, then zap init."));
+      process.exitCode = 1;
+      return;
+    }
+    await initRepo(cwd);
+    ui.log.success("Git repository initialized");
   }
 
   // 1. Git identity
@@ -51,17 +58,26 @@ export async function initCommand(): Promise<void> {
     }
   }
 
-  // 3. .gitignore
-  const gi = ensureGitignore(cwd);
+  // 3. .gitignore (create or update)
+  const gi = await ensureOrUpdateGitignore(cwd);
   if (gi.created) {
     ui.log.success(`Generated .gitignore (${gi.types.join(", ") || "generic"})`);
+  } else if (gi.addedLines.length > 0) {
+    ui.log.success(`Updated .gitignore (+${gi.addedLines.length} new patterns)`);
   } else {
-    ui.log.message(out.muted(".gitignore already exists, skipping"));
+    ui.log.message(out.muted(".gitignore is up to date"));
   }
 
   // 4. Dashboard connection (unlocks AI commit messages + push history)
   const config = getConfig();
   let dashboardConnected = !!config.zapApiKey;
+
+  if (dashboardConnected) {
+    const currentUrl = config.zapSupabaseUrl || "unknown";
+    ui.log.success(`Dashboard connected: ${currentUrl}`);
+    const reconnect = await ui.confirm("Connect to a different dashboard?", false);
+    if (reconnect) dashboardConnected = false;
+  }
 
   if (!dashboardConnected) {
     ui.log.message(out.info("Connect to the zap dashboard to enable AI commit messages and push history."));
@@ -78,21 +94,28 @@ export async function initCommand(): Promise<void> {
 
       const spin = ui.spinner();
       spin.start("Verifying API key...");
-      const valid = await verifyApiKey(apiKey, url);
-      if (valid) {
+      const ver = await verifyApiKey(apiKey, url);
+      if (ver.ok) {
         spin.stop("Dashboard connected ✓");
         dashboardConnected = true;
         ui.log.success("AI commit messages are ready — use `zap --ai` on your next push.");
       } else {
-        spin.stop("Couldn't reach dashboard (saved anyway)");
-        ui.log.message(out.muted("Sync will start once the dashboard is reachable."));
-        dashboardConnected = true;
+        spin.stop("Could not connect");
+        const hint = ver.error ?? "Unknown error — check the dashboard URL and API key";
+        ui.log.warn(out.muted(hint));
+        const force = await ui.confirm("Save connection anyway? (sync will start once fixed)", false);
+        if (force) {
+          dashboardConnected = true;
+          ui.log.message(out.muted("Saved — run `zap init` again to retry the connection."));
+        } else {
+          setConfigValue("zapSupabaseUrl", "");
+          setConfigValue("zapApiKey", "");
+          ui.log.message(out.muted("Connection cancelled. Run `zap init` again to retry."));
+        }
       }
     } else {
       ui.log.message(out.muted("Skipped — run `zap init` again anytime to connect."));
     }
-  } else {
-    ui.log.success("Dashboard already connected (AI commit messages available via `zap --ai`)");
   }
 
   // 5. AI default preference (only ask if dashboard is connected)
@@ -120,8 +143,8 @@ export async function initCommand(): Promise<void> {
     "Setup summary"
   );
 
-  // 7. Optional test push
-  const wantsTestPush = await ui.confirm("Run a test push now to verify everything works?", false);
+  // 7. Optional push
+  const wantsTestPush = await ui.confirm("Push your changes now?", false);
   if (wantsTestPush) {
     await pushCommand({});
   } else {

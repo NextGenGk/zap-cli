@@ -1,9 +1,9 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
+import { readdir, stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-// dist/lib/gitignore.js -> packages/cli/templates/gitignore
 const TEMPLATES_DIR = join(__dirname, "..", "..", "templates", "gitignore");
 
 export type ProjectType =
@@ -17,7 +17,7 @@ export type ProjectType =
   | "Rust"
   | "Java";
 
-function readJson(path: string): any | null {
+function readJson(path: string): unknown {
   try {
     return JSON.parse(readFileSync(path, "utf-8"));
   } catch {
@@ -30,21 +30,20 @@ export function detectProjectTypes(cwd: string = process.cwd()): ProjectType[] {
   const types: ProjectType[] = [];
   const has = (name: string) => existsSync(join(cwd, name));
 
-  const pkg = has("package.json") ? readJson(join(cwd, "package.json")) : null;
+  const pkg = has("package.json") ? (readJson(join(cwd, "package.json")) as Record<string, unknown> | null) : null;
   if (pkg) {
     types.push("Node");
-    const deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
+    const deps = { ...((pkg.dependencies as Record<string, string>) ?? {}), ...((pkg.devDependencies as Record<string, string>) ?? {}) };
     if (deps.next) types.push("Nextjs");
     else if (deps.react) types.push("React");
   }
 
   if (has("manage.py") || has("requirements.txt") || has("pyproject.toml") || has("Pipfile")) {
     types.push("Python");
-    const reqs = has("requirements.txt") ? readFileSync(join(cwd, "requirements.txt"), "utf-8") : "";
-    if (has("manage.py") || /django/i.test(reqs)) types.push("Django");
+    if (has("manage.py")) types.push("Django");
   }
 
-  if (has("artisan") || (has("composer.json") && /laravel\/framework/.test(JSON.stringify(readJson(join(cwd, "composer.json")) ?? {})))) {
+  if (has("artisan") || has("composer.json")) {
     types.push("Laravel");
   }
 
@@ -63,12 +62,141 @@ function loadTemplate(type: ProjectType): string {
   }
 }
 
-/** Project-specific extra lines that aren't covered by the generic templates. */
-function extraLinesFor(types: ProjectType[]): string[] {
-  const extras: string[] = [];
-  if (types.includes("Nextjs")) extras.push(".env.local");
-  if (types.includes("Django")) extras.push("*.sqlite3");
-  return extras;
+const COMMON_PATTERNS = [
+  "# OS files",
+  ".DS_Store",
+  "Thumbs.db",
+  "*.swp",
+  "*.swo",
+  "*~",
+  "",
+  "# IDE / Editor",
+  ".idea/",
+  ".vscode/",
+  "*.sublime-workspace",
+  "*.sublime-project",
+  ".vs/",
+  "*.suo",
+  "*.ntvs_*",
+  "",
+  "# Env files",
+  ".env",
+  ".env.local",
+  ".env.*.local",
+  ".env.production",
+  ".env.development",
+  ".env.test",
+  "",
+  "# Logs",
+  "*.log",
+  "npm-debug.log*",
+  "yarn-debug.log*",
+  "yarn-error.log*",
+  "pnpm-debug.log*",
+  "",
+  "# Dependencies",
+  "node_modules/",
+  ".pnp",
+  ".pnp.js",
+  ".yarn/cache",
+  ".yarn/unplugged",
+  ".yarn/build-state.yml",
+  ".yarn/install-state.gz",
+  "",
+  "# Build output",
+  "dist/",
+  "build/",
+  "*.tsbuildinfo",
+  "",
+  "# Runtime",
+  "*.pid",
+  "*.seed",
+  "*.pid.lock",
+];
+
+/** Scans the directory for actual artifact folders/files that should be ignored. */
+async function scanArtifacts(cwd: string): Promise<string[]> {
+  const artifacts: string[] = [];
+  const wellKnown: string[] = [
+    "node_modules", ".env", ".env.local", "dist", "build", ".next",
+    "out", "coverage", ".cache", ".turbo", ".vercel", ".venv",
+    "venv", "env", "__pycache__", ".pytest_cache", ".egg-info",
+    "vendor", ".git", ".gitignore", ".editorconfig",
+  ];
+
+  let entries: string[];
+  try {
+    entries = await readdir(cwd);
+  } catch {
+    return [];
+  }
+
+  for (const entry of entries) {
+    if (wellKnown.includes(entry)) {
+      let isDir = false;
+      try {
+        isDir = (await stat(join(cwd, entry))).isDirectory();
+      } catch { /* ignore */ }
+      if (isDir && entry !== ".git") {
+        if (!artifacts.includes(`${entry}/`)) artifacts.push(`${entry}/`);
+      } else if (!isDir && !entry.startsWith(".")) {
+        // skip non-hidden regular files, they're source code
+      } else if (entry !== ".gitignore" && entry !== ".editorconfig") {
+        if (!artifacts.includes(entry)) artifacts.push(entry);
+      }
+    }
+  }
+
+  return artifacts;
+}
+
+/** Extracts individual ignore patterns (non-comment, non-blank lines) from gitignore content. */
+function extractPatterns(content: string): string[] {
+  return content
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith("#"));
+}
+
+/** Merges new patterns into existing gitignore content, returning the merged result and what was added. */
+function mergePatterns(existing: string, newPatterns: string[]): { merged: string; added: string[] } {
+  const existingPatterns = new Set(extractPatterns(existing));
+  const added: string[] = [];
+  const sections: string[] = [];
+
+  let currentSection = "";
+  for (const line of newPatterns) {
+    const trimmed = line.trim();
+    if (trimmed === "") {
+      if (currentSection) {
+        sections.push(currentSection);
+        currentSection = "";
+      }
+      continue;
+    }
+    if (trimmed.startsWith("#")) {
+      if (currentSection) sections.push(currentSection);
+      currentSection = trimmed + "\n";
+      continue;
+    }
+    if (existingPatterns.has(trimmed)) {
+      if (currentSection) {
+        sections.push(currentSection);
+        currentSection = "";
+      }
+      continue;
+    }
+    existingPatterns.add(trimmed);
+    added.push(trimmed);
+    currentSection += trimmed + "\n";
+  }
+  if (currentSection) sections.push(currentSection);
+
+  if (added.length === 0) return { merged: existing, added: [] };
+
+  const insert = "\n# ---- zap auto-add ----\n" + added.join("\n") + "\n";
+  const merged = existing.endsWith("\n") ? existing + insert : existing + "\n" + insert;
+  return { merged, added };
 }
 
 export interface GitignoreResult {
@@ -84,13 +212,24 @@ export interface GitignoreResult {
  * grouped by section).
  */
 export function generateGitignore(types: ProjectType[]): string {
-  if (types.length === 0) {
-    return "# Environment\n.env\n.env.local\n\n# OS\n.DS_Store\n";
-  }
-
   const seen = new Set<string>();
   const sections: string[] = [];
 
+  // Common base patterns
+  const commonLines: string[] = [];
+  for (const line of COMMON_PATTERNS) {
+    const trimmed = line.trim();
+    if (trimmed === "" || trimmed.startsWith("#")) {
+      commonLines.push(line);
+      continue;
+    }
+    if (seen.has(trimmed)) continue;
+    seen.add(trimmed);
+    commonLines.push(line);
+  }
+  sections.push("# ---- common ----\n" + commonLines.join("\n"));
+
+  // Per-project templates
   for (const type of types) {
     const content = loadTemplate(type);
     if (!content) continue;
@@ -99,7 +238,6 @@ export function generateGitignore(types: ProjectType[]): string {
     const kept: string[] = [];
     for (const line of lines) {
       const trimmed = line.trim();
-      // Always keep blank lines and comments for readability within a section
       if (trimmed === "" || trimmed.startsWith("#")) {
         kept.push(line);
         continue;
@@ -108,37 +246,48 @@ export function generateGitignore(types: ProjectType[]): string {
       seen.add(trimmed);
       kept.push(line);
     }
-
     sections.push(`# ---- ${type} ----\n${kept.join("\n").trim()}`);
-  }
-
-  const extras = extraLinesFor(types).filter((l) => !seen.has(l));
-  if (extras.length > 0) {
-    sections.push(`# ---- project-specific ----\n${extras.join("\n")}`);
   }
 
   return sections.join("\n\n") + "\n";
 }
 
 /**
- * Creates `.gitignore` in `cwd` if it doesn't already exist, based on
- * detected project type(s). No-ops (created: false) if one already exists.
+ * Creates or updates `.gitignore` in `cwd` based on detected project types
+ * and actual directory artifacts. Returns what was added.
  */
-export function ensureGitignore(cwd: string = process.cwd()): GitignoreResult {
+export async function ensureOrUpdateGitignore(cwd: string = process.cwd()): Promise<GitignoreResult> {
   const path = join(cwd, ".gitignore");
   const types = detectProjectTypes(cwd);
+  const artifacts = await scanArtifacts(cwd);
 
-  if (existsSync(path)) {
+  // Build the full set of patterns for this project
+  const fullContent = generateGitignore(types);
+  const allPatterns = COMMON_PATTERNS.concat(extractPatterns(fullContent));
+
+  // Add patterns for artifacts found on disk
+  for (const a of artifacts) {
+    const pattern = a.endsWith("/") ? a : a;
+    if (!allPatterns.some((p) => p.trim() === pattern)) {
+      allPatterns.push(pattern);
+    }
+  }
+
+  if (!existsSync(path)) {
+    // Create fresh
+    writeFileSync(path, fullContent, "utf-8");
+    const addedLines = extractPatterns(fullContent);
+    return { created: true, path, types, addedLines };
+  }
+
+  // Update existing: merge in any missing patterns
+  const existing = readFileSync(path, "utf-8");
+  const { merged, added } = mergePatterns(existing, allPatterns);
+
+  if (added.length === 0) {
     return { created: false, path, types, addedLines: [] };
   }
 
-  const contents = generateGitignore(types);
-  writeFileSync(path, contents, "utf-8");
-
-  const addedLines = contents
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l && !l.startsWith("#"));
-
-  return { created: true, path, types, addedLines };
+  writeFileSync(path, merged, "utf-8");
+  return { created: false, path, types, addedLines: added };
 }

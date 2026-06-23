@@ -1,11 +1,11 @@
 {
   "name": "zap-git",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Replace your entire git push workflow with one command: zap.",
   "author": "gaurav",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nextgengk/zap-cli"
+    "url": "git+https://github.com/NextGenGk/zap-cli.git"
   },
   "keywords": [
     "git",
@@ -15,7 +15,7 @@
   ],
   "type": "module",
   "bin": {
-    "zap": "./dist/index.js"
+    "zap": "dist/index.js"
   },
   "files": [
     "dist",

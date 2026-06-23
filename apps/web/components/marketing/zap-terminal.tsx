@@ -11,20 +11,23 @@ interface TerminalLine {
 }
 
 const LINES: TerminalLine[] = [
-  { text: "$ zap", delay: 300 },
+  { text: "$ zap --ai", delay: 300 },
   { text: "", delay: 200 },
-  { text: "  ◆  zap  —  3 files changed on feat/login", color: "brand", delay: 350 },
+  { text: "  ◆  zap --ai  —  3 files changed on feat/login", color: "brand", delay: 350 },
   { text: "", delay: 100 },
   { text: "  M  src/auth/Login.jsx", color: "warning", delay: 120 },
   { text: "  A  src/auth/OTP.jsx", color: "success", delay: 120 },
   { text: "  D  src/auth/old.jsx", color: "muted", delay: 120 },
+  { text: "", delay: 250 },
+  { text: "  ◌  Scanning repo context...", color: "muted", delay: 400 },
+  { text: "  ◌  Generating commit message with Groq...", color: "muted", delay: 700 },
   { text: "", delay: 200 },
-  { text: "  ○  Commit message", color: "brand", delay: 300 },
-  { text: "  │  feat(auth): add OTP verification to login", color: "default", delay: 500 },
+  { text: "  ○  AI suggestion", color: "brand", delay: 300 },
+  { text: "  │  feat(auth): add OTP verification step to login flow", color: "default", delay: 500 },
   { text: "", delay: 200 },
   { text: "  ◇  Pushing to feat/login...", color: "muted", delay: 700 },
   { text: "", delay: 300 },
-  { text: "  ✓  Done in 1.2s", color: "success", delay: 200 },
+  { text: "  ✓  Done in 2.4s", color: "success", delay: 200 },
   { text: "     → commit a3f91c2", color: "muted", delay: 120 },
   { text: "     → github.com/you/repo/commit/a3f91c2", color: "muted", delay: 120 },
 ];
@@ -53,7 +56,7 @@ export function ZapTerminal({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "w-full max-w-xl rounded-(--radius-card) border border-border bg-surface font-mono text-[13px] leading-relaxed shadow-none",
+        "w-full max-w-xl flex flex-col h-[480px] rounded-(--radius-card) border border-border bg-surface font-mono text-[13px] leading-relaxed shadow-none overflow-hidden",
         className
       )}
     >
@@ -63,7 +66,7 @@ export function ZapTerminal({ className }: { className?: string }) {
         <span className="h-2.5 w-2.5 rounded-full bg-success/60" />
         <span className="ml-2 text-xs text-fg-subtle">~/projects/repo</span>
       </div>
-      <div className="min-h-[360px] p-4">
+      <div className="flex-1 overflow-hidden p-4 relative">
         <AnimatePresence initial={false}>
           {LINES.slice(0, visibleCount).map((line, i) => (
             <motion.div

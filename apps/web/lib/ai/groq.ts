@@ -1,8 +1,8 @@
 import Groq from "groq-sdk";
 
-export const GROQ_MODEL = "openai/gpt-oss-120b";
+export const GROQ_MODEL = "llama-3.1-8b-instant";
 
-const REQUEST_TIMEOUT_MS = 15_000;
+const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_DIFF_CHARS = 6000;
 
 /**
@@ -10,12 +10,13 @@ const MAX_DIFF_CHARS = 6000;
  * Instructs the model to read specific symbols (function names, component
  * names, config keys) from the diff rather than producing generic messages.
  */
-export const COMMIT_MESSAGE_SYSTEM_PROMPT = `You are an expert software engineer writing a git commit message for the exact diff provided below.
+export const COMMIT_MESSAGE_SYSTEM_PROMPT = `You are an expert software engineer writing a git commit message. You are given a git diff along with project context (repo file tree, package.json, README) so you understand the broader project.
 
-Read the diff carefully:
+Read the diff carefully in the context of the whole project:
 - File paths tell you the area of the codebase (the "scope").
 - Lines starting with "+" were added, lines starting with "-" were removed.
 - Function/class/component names, imports, and config keys that changed are the most important signal — name them when relevant.
+- Use the project context to understand what the project does and write a more meaningful, specific message.
 
 Write ONE commit message in Conventional Commits format: type(scope): description
 
@@ -29,7 +30,6 @@ Good examples:
 - feat(auth): add OTP verification step to login flow
 - fix(api): handle null response in fetchOrders
 - refactor(db): extract connection pool into separate module
-- docs(readme): document zap --dry-run flag
 
 Bad examples (too vague — avoid this style):
 - chore: update files
@@ -79,10 +79,9 @@ export async function generateCommitMessageViaGroq(diff: string): Promise<GroqCo
         { role: "system", content: COMMIT_MESSAGE_SYSTEM_PROMPT },
         { role: "user", content: `Diff:\n\n${activeDiff}` },
       ],
-      temperature: 0.2,
-      max_completion_tokens: 120,
-      top_p: 0.9,
-      reasoning_effort: "medium",
+      temperature: 1,
+      max_completion_tokens: 1024,
+      top_p: 1,
       stream: false,
       stop: null,
     } as Parameters<typeof client.chat.completions.create>[0]) as import("groq-sdk/resources/chat/completions").ChatCompletion;

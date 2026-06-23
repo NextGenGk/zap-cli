@@ -17,7 +17,7 @@ import {
   GitError,
 } from "../lib/git.js";
 import { suggestCommitMessageFromFiles } from "../lib/ai.js";
-import { ensureGitignore } from "../lib/gitignore.js";
+import { ensureOrUpdateGitignore } from "../lib/gitignore.js";
 
 /**
  * Sets up a bare "remote" repo plus a working repo with `origin` pointing at
@@ -125,7 +125,7 @@ describe("full push flow (integration)", () => {
     writeFileSync(join(workDir, "package.json"), JSON.stringify({ name: "x", dependencies: { express: "^4.0.0" } }));
     writeFileSync(join(workDir, "index.js"), "console.log('hi')");
 
-    const result = ensureGitignore(workDir);
+    const result = await ensureOrUpdateGitignore(workDir);
     assert.equal(result.created, true);
     assert.deepEqual(result.types, ["Node"]);
 

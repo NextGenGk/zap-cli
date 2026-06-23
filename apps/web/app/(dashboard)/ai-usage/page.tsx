@@ -21,7 +21,7 @@ export default async function AiUsagePage() {
 
   return (
     <div className="flex flex-col">
-      <Topbar title="AI usage" description="How much zap --ai has done for you, powered by Groq (openai/gpt-oss-120b)." />
+      <Topbar title="AI usage" description="How much zap --ai has done for you, powered by Groq (llama-3.1-8b-instant)." />
 
       <div className="flex flex-col gap-6 p-8">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -31,10 +31,12 @@ export async function POST(request: Request) {
 
     // Track token usage for the dashboard AI-usage page (non-blocking).
     const admin = createAdminClient();
-    void admin.from("ai_usage").insert({
+    admin.from("ai_usage").insert({
       user_id: auth.userId,
       tokens_used: result.tokensUsed,
       model: result.model,
+    }).then(({ error }) => {
+      if (error) console.error("Failed to record ai_usage:", error.message);
     });
 
     return NextResponse.json({

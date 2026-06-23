@@ -1,40 +1,38 @@
 import Link from "next/link";
-import { ZapMark } from "./zap-mark";
-import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { TextRoll } from "@/components/ui/text-roll";
 
 export function MarketingNavbar() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-canvas/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-2">
-          <ZapMark size={20} animated={false} />
-          <span className="font-display text-lg font-bold text-fg">zap</span>
-        </Link>
+    <header className="sticky top-0 z-40 bg-canvas/90 backdrop-blur-md uppercase text-[11px] tracking-[0.1em] font-medium text-fg-muted">
+      <div className="w-full px-6">
+        <div className="mx-auto flex h-16 w-full max-w-[1200px] items-stretch border-b border-dashed border-border/60" style={{ borderBottomStyle: 'dashed' }}>
+          <Link href="#features" className="group hidden md:flex items-center justify-start px-8 border-r border-border/50 border-dashed hover:text-fg transition-colors">
+            <TextRoll>Features</TextRoll>
+          </Link>
+          <Link href="#how-it-works" className="group hidden md:flex items-center justify-center px-8 border-r border-border/50 border-dashed hover:text-fg transition-colors">
+            <TextRoll>How it works</TextRoll>
+          </Link>
+          <Link href="/docs" className="group hidden md:flex items-center justify-center px-8 border-r border-border/50 border-dashed hover:text-fg transition-colors">
+            <TextRoll>Docs</TextRoll>
+          </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
-          <Link href="#features" className="zap-underline text-sm text-fg-muted hover:text-fg">
-            Features
-          </Link>
-          <Link href="#how-it-works" className="zap-underline text-sm text-fg-muted hover:text-fg">
-            How it works
-          </Link>
-          <Link
-            href="https://github.com"
-            className="zap-underline text-sm text-fg-muted hover:text-fg"
-            target="_blank"
-            rel="noreferrer"
-          >
-            GitHub
-          </Link>
-        </nav>
+          <div className="flex-1 flex items-center justify-center border-r border-border/50 border-dashed px-4">
+            <Link href="/" className="flex items-center gap-2.5">
+              <Image src="/zap.svg" alt="Zap Logo" width={28} height={28} />
+              <span className="font-display text-2xl font-bold tracking-widest text-fg">ZAP</span>
+            </Link>
+          </div>
 
-        <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/login">Sign in</Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link href="/signup">Get started</Link>
-          </Button>
+          <Link href="#pricing" className="group hidden md:flex items-center justify-center px-8 border-r border-border/50 border-dashed hover:text-fg transition-colors">
+            <TextRoll>Pricing</TextRoll>
+          </Link>
+          <Link href="/login" className="group hidden md:flex items-center justify-center px-8 border-r border-border/50 border-dashed hover:text-fg transition-colors">
+            <TextRoll>Sign In</TextRoll>
+          </Link>
+          <Link href="/signup" className="group hidden md:flex items-center justify-center px-8 hover:text-brand transition-colors">
+            <TextRoll>Get Started</TextRoll>
+          </Link>
         </div>
       </div>
     </header>

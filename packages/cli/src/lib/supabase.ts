@@ -2,7 +2,7 @@ import axios from "axios";
 import type { PushLogEntry } from "./config.js";
 
 const SYNC_TIMEOUT_MS = 5000;
-const AI_TIMEOUT_MS = 15000;
+const AI_TIMEOUT_MS = 30000;
 
 export interface SyncCredentials {
   apiKey: string;
@@ -137,16 +137,28 @@ export async function fetchRemotePushLog(creds: SyncCredentials | null, limit = 
   }
 }
 
+export interface VerifyResult {
+  ok: boolean;
+  error?: string;
+}
+
 /** Verifies an API key against the dashboard during `zap init`. */
-export async function verifyApiKey(apiKey: string, baseUrl: string): Promise<boolean> {
+export async function verifyApiKey(apiKey: string, baseUrl: string): Promise<VerifyResult> {
   try {
     const res = await axios.get(`${baseUrl.replace(/\/+$/, "")}/api/keys/verify`, {
       headers: { Authorization: `Bearer ${apiKey}` },
       timeout: SYNC_TIMEOUT_MS,
     });
-    return res.status === 200;
-  } catch {
-    return false;
+    return { ok: res.status === 200 };
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      if (err.code === "ENOTFOUND") return { ok: false, error: "Dashboard URL is unreachable (DNS lookup failed)" };
+      if (err.code === "ECONNREFUSED") return { ok: false, error: "Dashboard refused the connection" };
+      if (err.code === "ECONNABORTED" || err.code === "ETIMEDOUT") return { ok: false, error: "Connection timed out" };
+      if (err.response?.status === 401) return { ok: false, error: "API key is invalid or revoked" };
+      if (err.response) return { ok: false, error: `Dashboard returned ${err.response.status}` };
+    }
+    return { ok: false, error: (err as Error).message };
   }
 }
 
@@ -212,7 +224,13 @@ export async function generateAiCommitMessage(creds: SyncCredentials | null, dif
       if (err.response?.status === 400 && reason === "empty-diff") {
         throw new DashboardAiError("No diff content to summarize", "empty-diff");
       }
+      if (err.response) {
+        throw new DashboardAiError(`Dashboard returned ${err.response.status}`, "api-error");
+      }
+      if (err.code === "ENOTFOUND" || err.code === "ECONNREFUSED" || err.code === "ERR_NETWORK") {
+        throw new DashboardAiError(`Cannot reach dashboard (${err.code})`, "api-error");
+      }
     }
-    throw new DashboardAiError("Dashboard AI request failed", "api-error");
+    throw new DashboardAiError(`Dashboard AI request failed: ${(err as Error).message}`, "api-error");
   }
 }

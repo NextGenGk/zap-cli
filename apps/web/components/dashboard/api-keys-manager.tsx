@@ -31,7 +31,7 @@ export function ApiKeysManager({ apiKeys }: { apiKeys: ApiKeyRow[] }) {
     return createApiKey(formData);
   }, initialCreateState);
 
-  const [, revokeAction] = useActionState(async (_: ActionResult, formData: FormData) => {
+  const [revokeState, revokeAction] = useActionState(async (_: ActionResult, formData: FormData) => {
     return revokeApiKey(formData);
   }, initialRevokeState);
 
@@ -119,13 +119,39 @@ export function ApiKeysManager({ apiKeys }: { apiKeys: ApiKeyRow[] }) {
                   </TableCell>
                   <TableCell className="text-right">
                     {!key.revoked_at && (
-                      <form action={revokeAction}>
-                        <input type="hidden" name="id" value={key.id} />
-                        <Button type="submit" variant="ghost" size="sm">
-                          <Trash size={14} />
-                          Revoke
-                        </Button>
-                      </form>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button type="button" variant="ghost" size="sm">
+                            <Trash size={14} />
+                            Revoke
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Revoke API key</DialogTitle>
+                            <DialogDescription>
+                              This will immediately invalidate the key <strong>{key.label}</strong>. Any CLI using it will
+                              lose access to the dashboard.
+                            </DialogDescription>
+                          </DialogHeader>
+                          {revokeState.error && (
+                            <p className="text-sm text-danger">{revokeState.error}</p>
+                          )}
+                          <DialogFooter>
+                            <DialogClose asChild>
+                              <Button type="button" variant="ghost">
+                                Cancel
+                              </Button>
+                            </DialogClose>
+                            <form action={revokeAction}>
+                              <input type="hidden" name="id" value={key.id} />
+                              <Button type="submit" variant="destructive" size="sm">
+                                Yes, revoke
+                              </Button>
+                            </form>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     )}
                   </TableCell>
                 </TableRow>
