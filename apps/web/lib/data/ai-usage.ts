@@ -15,7 +15,7 @@ const AVG_SECONDS_SAVED_PER_AI_COMMIT = 90;
 
 export async function getAiUsageStats(supabase: TypedSupabaseClient, userId: string): Promise<AiUsageStats> {
   const [{ data: usage }, { count: totalAiPushes }, { count: totalPushes }] = await Promise.all([
-    supabase.from("ai_usage").select("tokens_used"),
+    supabase.from("ai_usage").select("tokens_used").eq("user_id", userId),
     supabase.from("push_events").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("used_ai", true),
     supabase.from("push_events").select("id", { count: "exact", head: true }).eq("user_id", userId),
   ]);

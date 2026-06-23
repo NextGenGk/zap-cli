@@ -192,6 +192,14 @@ export async function setGitUserConfig(name: string, email: string, cwd?: string
   await git(cwd).addConfig("user.email", email);
 }
 
+export async function initRepo(cwd?: string): Promise<void> {
+  try {
+    await git(cwd).init();
+  } catch (err) {
+    throw new GitError(`Failed to initialize git repository: ${(err as Error).message}`);
+  }
+}
+
 export async function addRemote(url: string, cwd?: string): Promise<void> {
   await git(cwd).addRemote("origin", url);
 }
@@ -217,4 +225,44 @@ export async function listLocalBranches(cwd?: string): Promise<string[]> {
   } catch {
     return [];
   }
+}
+
+export interface RepoContext {
+  fileTree: string;
+  packageJson: string;
+  readme: string;
+}
+
+export async function getRepoContext(cwd?: string): Promise<RepoContext> {
+  let fileTree = "";
+  let packageJson = "";
+  let readme = "";
+
+  try {
+    const files = await git(cwd).raw(["ls-files"]);
+    fileTree = files.trim();
+  } catch { /* not tracked yet */ }
+
+  try {
+    const fs = await import("node:fs");
+    const pkgPath = (cwd ?? process.cwd()) + "/package.json";
+    if (fs.existsSync(pkgPath)) {
+      const raw = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+      const brief: Record<string, unknown> = {};
+      for (const key of ["name", "version", "description", "type", "scripts", "dependencies", "devDependencies"]) {
+        if (raw[key]) brief[key] = raw[key];
+      }
+      packageJson = JSON.stringify(brief, null, 2);
+    }
+  } catch { /* no package.json */ }
+
+  try {
+    const fs = await import("node:fs");
+    const readmePath = (cwd ?? process.cwd()) + "/README.md";
+    if (fs.existsSync(readmePath)) {
+      readme = fs.readFileSync(readmePath, "utf-8").slice(0, 2000);
+    }
+  } catch { /* no README.md */ }
+
+  return { fileTree, packageJson, readme };
 }

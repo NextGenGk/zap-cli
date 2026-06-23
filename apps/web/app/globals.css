@@ -17,25 +17,25 @@
 
 @theme {
   /* ---- Color tokens ---- */
-  --color-canvas: #09090b; /* background primary, zinc-950 */
-  --color-surface: #111113; /* card surfaces */
-  --color-surface-elevated: #1a1a1e; /* hover states, modals */
-  --color-border: #27272a; /* zinc-800 */
-  --color-border-strong: #3f3f46; /* zinc-700 */
+  --color-canvas: oklch(18.22% 0 0);
+  --color-surface: oklch(26.03% 0 0);
+  --color-surface-elevated: oklch(30.12% 0 0);
+  --color-border: oklch(30.12% 0 0);
+  --color-border-strong: oklch(63.01% 0 0);
 
-  --color-brand: #6ee7b7; /* emerald-300, zap green */
-  --color-success: #4ade80; /* green-400 */
-  --color-warning: #facc15; /* yellow-400 */
-  --color-danger: #f87171; /* red-400 */
-  --color-info: #60a5fa; /* blue-400 */
+  --color-brand: oklch(68.56% 0.1558 158.13);
+  --color-success: oklch(68.56% 0.1558 158.13);
+  --color-warning: oklch(70.84% 0.1523 71.24);
+  --color-danger: oklch(62.71% 0.1936 33.34);
+  --color-info: oklch(61.26% 0.218 283.85);
 
-  --color-fg: #fafafa; /* text primary, zinc-50 */
-  --color-fg-muted: #a1a1aa; /* text secondary, zinc-400 */
-  --color-fg-subtle: #52525b; /* text muted, zinc-600 */
+  --color-fg: oklch(98.51% 0 0);
+  --color-fg-muted: oklch(63.01% 0 0);
+  --color-fg-subtle: oklch(63.01% 0 0);
 
   /* ---- Typography ---- */
-  --font-display: "Labil Grotesk Variable", "Inter", Arial, sans-serif;
-  --font-body: "Labil Grotesk Variable", "Inter", Arial, sans-serif;
+  --font-display: var(--font-phudu), "Inter", Arial, sans-serif;
+  --font-body: var(--font-phudu), "Inter", Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* ---- Radius ---- */
@@ -64,8 +64,9 @@
     background-color: var(--color-canvas);
     color: var(--color-fg);
     font-family: var(--font-body);
+    font-size: 14px;
     font-weight: 400;
-    line-height: 1.65;
+    line-height: 16.8px;
     -webkit-font-smoothing: antialiased;
   }
 

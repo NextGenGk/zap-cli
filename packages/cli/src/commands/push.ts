@@ -11,6 +11,7 @@ import {
   pushBranch,
   getDiff,
   createAndCheckoutBranch,
+  getRepoContext,
   GitError,
   type ChangedFile,
 } from "../lib/git.js";
@@ -19,7 +20,6 @@ import { getEffectiveConfig, addPushLogEntry, type CheckMode } from "../lib/conf
 import {
   getSyncCredentials,
   logPushEvent,
-  logAiUsage,
   generateAiCommitMessage,
   DashboardAiError,
   type SyncCredentials,
@@ -27,7 +27,7 @@ import {
 import { detectCheckScripts, runPrePushChecks } from "../lib/lint.js";
 import * as out from "../ui/output.js";
 import * as ui from "../ui/prompts.js";
-import { ensureGitignore } from "../lib/gitignore.js";
+import { ensureOrUpdateGitignore } from "../lib/gitignore.js";
 import { randomUUID } from "node:crypto";
 
 export interface PushOptions {
@@ -51,11 +51,13 @@ export async function pushCommand(options: PushOptions = {}): Promise<void> {
     return;
   }
 
-  // Auto-generate .gitignore on first run if missing (skip during dry-run)
+  // Auto-generate or update .gitignore (skip during dry-run)
   if (!dry) {
-    const gi = ensureGitignore(cwd);
+    const gi = await ensureOrUpdateGitignore(cwd);
     if (gi.created) {
       console.log(out.info(`Generated .gitignore (${gi.types.join(", ") || "generic"})`));
+    } else if (gi.addedLines.length > 0) {
+      console.log(out.info(`Updated .gitignore (+${gi.addedLines.length} patterns)`));
     }
   }
 
@@ -106,9 +108,10 @@ export async function pushCommand(options: PushOptions = {}): Promise<void> {
   }
 
   // 4. Display changed files
+  const useAi = options.ai || config.aiDefault;
   console.log(
     out.header(
-      dry ? "zap --dry-run" : options.ai ? "zap --ai" : "zap",
+      dry ? "zap --dry-run" : useAi ? "zap --ai" : "zap",
       `${files.length} file${files.length === 1 ? "" : "s"} changed on ${branch}`
     )
   );
@@ -118,18 +121,16 @@ export async function pushCommand(options: PushOptions = {}): Promise<void> {
   const creds = getSyncCredentials(config);
   let commitMessage: string;
   let usedAi = false;
-  let aiTokens = 0;
 
   if (dry) {
-    commitMessage = options.ai
+    commitMessage = useAi
       ? "feat(scope): <AI-generated message> (skipped in dry run)"
       : suggestCommitMessageFromFiles(files);
-    console.log(`\n  ${out.muted("[DRY RUN]")} ${out.commitMsgBlock(commitMessage, options.ai ? out.aiBadge() : undefined)}`);
-  } else if (options.ai) {
+    console.log(`\n  ${out.muted("[DRY RUN]")} ${out.commitMsgBlock(commitMessage, useAi ? out.aiBadge() : undefined)}`);
+  } else if (useAi) {
     const result = await runAiFlow(cwd, files, creds, config.groqApiKey);
     commitMessage = result.message;
     usedAi = result.usedAi;
-    aiTokens = result.tokensUsed;
   } else {
     const suggestion = suggestCommitMessageFromFiles(files);
     const choice = await ui.commitMessagePrompt(suggestion);
@@ -175,7 +176,7 @@ export async function pushCommand(options: PushOptions = {}): Promise<void> {
     }
     console.log(out.success(`Done in ${(durationMs / 1000).toFixed(1)}s`, details));
 
-    // 9. Local + remote logging (non-blocking)
+    // 9. Local + remote logging
     addPushLogEntry({
       id: randomUUID(),
       repo: remote ? remoteUrlToHttps(remote) : cwd,
@@ -189,17 +190,21 @@ export async function pushCommand(options: PushOptions = {}): Promise<void> {
       createdAt: new Date().toISOString(),
     });
 
-    void logPushEvent(creds, {
-      repoUrl: remote ? remoteUrlToHttps(remote) : null,
-      branch,
-      commitHash: commit.hash,
-      commitMsg: commitMessage,
-      filesChanged: files.length,
-      usedAi,
-      durationMs,
-    });
-    if (usedAi && aiTokens > 0) {
-      void logAiUsage(creds, aiTokens, "openai/gpt-oss-120b");
+    const syncWarnings: string[] = [];
+    if (creds) {
+      const pushOk = await logPushEvent(creds, {
+        repoUrl: remote ? remoteUrlToHttps(remote) : null,
+        branch,
+        commitHash: commit.hash,
+        commitMsg: commitMessage,
+        filesChanged: files.length,
+        usedAi,
+        durationMs,
+      });
+      if (!pushOk) syncWarnings.push("Could not sync push to dashboard");
+    }
+    for (const w of syncWarnings) {
+      console.log(`  ${out.colors.warning("⚠")}  ${out.colors.muted(w)}`);
     }
   } catch (err) {
     if (err instanceof GitError) {
@@ -215,6 +220,7 @@ interface AiFlowResult {
   message: string;
   usedAi: boolean;
   tokensUsed: number;
+  model: string;
 }
 
 /**
@@ -238,37 +244,52 @@ async function runAiFlow(
   while (true) {
     let diff = await getDiff(true, cwd);
     if (!diff.trim()) diff = await getDiff(false, cwd);
+    if (!diff.trim() && files.length > 0) {
+      diff = files.map((f) => `${f.status === "A" ? "+++" : f.status === "D" ? "---" : "  "} ${f.path}`).join("\n");
+    }
+
+    const ctx = await getRepoContext(cwd);
+    const contextParts: string[] = [];
+    if (ctx.fileTree) contextParts.push(`## Repository files\n\`\`\`\n${ctx.fileTree}\n\`\`\``);
+    if (ctx.packageJson) contextParts.push(`## package.json\n\`\`\`json\n${ctx.packageJson}\n\`\`\``);
+    if (ctx.readme) contextParts.push(`## README\n${ctx.readme}`);
+    const enrichedDiff = contextParts.length > 0
+      ? `Project context:\n${contextParts.join("\n\n")}\n\nGit diff:\n${diff}`
+      : diff;
 
     const spin = ui.spinner();
     spin.start("Generating commit message with Groq...");
 
-    let generated: { message: string; tokensUsed: number } | null = null;
+    let generated: { message: string; tokensUsed: number; model: string } | null = null;
     let failureHint: string | null = null;
 
     if (creds) {
       try {
-        const result = await generateAiCommitMessage(creds, diff);
-        generated = { message: result.message, tokensUsed: 0 };
+        const result = await generateAiCommitMessage(creds, enrichedDiff);
+        generated = { message: result.message, tokensUsed: result.tokensUsed, model: result.model };
       } catch (err) {
         const reason = err instanceof DashboardAiError ? err.reason : "api-error";
+        const msg = err instanceof Error ? err.message : String(err);
         failureHint =
           reason === "no-server-key"
-            ? "AI commit messages aren't enabled on this dashboard yet."
+            ? "AI not enabled on this dashboard (server missing GROQ_API_KEY)."
             : reason === "empty-diff"
               ? "No diff content to summarize."
-              : "Falling back to manual message prompt.";
+              : `Dashboard error: ${msg}`;
       }
     }
 
     if (!generated && groqApiKey) {
       try {
-        const result = await generateCommitMessage(diff, groqApiKey);
-        generated = { message: result.message, tokensUsed: result.tokensUsed };
-        failureHint = null; // Successfully generated with local key
+        const result = await generateCommitMessage(enrichedDiff, groqApiKey);
+        generated = { message: result.message, tokensUsed: result.tokensUsed, model: result.model };
+        failureHint = null;
       } catch (err) {
         const reason = err instanceof AiCommitError ? err.reason : "api-error";
-        failureHint =
-          failureHint ?? (reason === "empty-diff" ? "No diff content to summarize." : "Falling back to manual message prompt.");
+        const msg = err instanceof Error ? err.message : String(err);
+        if (!failureHint) {
+          failureHint = reason === "empty-diff" ? "No diff content to summarize." : `${msg}`;
+        }
       }
     }
 
@@ -285,9 +306,9 @@ async function runAiFlow(
 
       if (choice.action === "regenerate") continue;
       if (choice.action === "edit") {
-        return { message: choice.message, usedAi: true, tokensUsed: generated.tokensUsed };
+        return { message: choice.message, usedAi: true, tokensUsed: generated.tokensUsed, model: generated.model };
       }
-      return { message: generated.message, usedAi: true, tokensUsed: generated.tokensUsed };
+      return { message: generated.message, usedAi: true, tokensUsed: generated.tokensUsed, model: generated.model };
     }
 
     spin.stop("AI commit message unavailable");
@@ -295,7 +316,7 @@ async function runAiFlow(
 
     const choice = await ui.commitMessagePrompt(fallback);
     const message = choice.action === "edit" ? choice.message : fallback;
-    return { message, usedAi: false, tokensUsed: 0 };
+    return { message, usedAi: false, tokensUsed: 0, model: "" };
   }
 }
 
