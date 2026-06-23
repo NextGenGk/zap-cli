@@ -60,45 +60,185 @@ NEXT_PUBLIC_APP_URL=         # your Vercel URL
 
 ## Commands
 
-| Command | What it does |
+### `zap`
+
+Stage all changes, commit, and push the current branch. If the project hasn't been initialized, runs the setup wizard first.
+
+```
+zap [options]
+```
+
+| Flag | Description |
 |---|---|
-| `zap` | Stage all → commit → push current branch |
-| `zap --ai` | Same, with AI-generated commit message |
-| `zap --dry-run` | Simulation — no git changes, no push |
-| `zap --undo` | `git reset --soft HEAD~1` — undo last commit, keep changes staged |
-| `zap --check` | Run lint/test/build checks before pushing |
-| `zap --skip-check` | Skip pre-push checks for this push |
-| `zap log` | Show recent push history (dashboard if connected, local otherwise) |
-| `zap init` | First-time setup (git identity, remote, .gitignore, dashboard) |
-| `zap config --show` | View all local settings |
-| `zap config --check always\|never\|ask` | Set pre-push check behavior |
-| `zap config --ai on\|off` | Toggle AI commit messages by default |
-| `zap config --warn-main on\|off` | Toggle main/master branch warning |
+| `--ai` | Generate the commit message with AI |
+| `--dry-run` | Simulate the full flow without making any changes |
+| `--check` | Run pre-push checks (lint / test / build) before pushing |
+| `--skip-check` | Skip pre-push checks for this push |
+| `--undo` | Undo the last commit (git reset --soft HEAD~1), keep changes staged |
+
+**Examples:**
+
+```bash
+zap                          # push with a manual message
+zap --ai                     # push with an AI-generated message
+zap --dry-run                # see what would happen
+zap --check                  # push after checks pass
+zap --skip-check             # push without checks
+zap --undo                   # undo the last push
+```
+
+---
+
+### `zap init`
+
+Interactive first-time setup wizard. Creates a git repo if needed, sets your git identity, generates a `.gitignore` from your project stack, and optionally connects to the zap dashboard for AI commit messages and push history.
+
+```
+zap init
+```
+
+**Example:**
+
+```bash
+$ zap init
+  ◇  Setting up your project...
+  ✓  Initialized empty Git repo
+  ✓  Identity set — Alex
+  ✓  .gitignore generated (12 entries)
+  ✓  Dashboard linked
+  →  Ready in 1.2s
+```
+
+Re-run `zap init` anytime to reconnect a different dashboard. Runs automatically on first `zap` if uninitialized.
+
+---
+
+### `zap log`
+
+View recent push history across your repos. Shows time, branch, commit message, and hash. Fetches from the dashboard if connected, otherwise reads from local cache.
+
+```
+zap log [options]
+```
+
+| Flag | Description |
+|---|---|
+| `-n, --limit <number>` | Number of entries to show (default: 20) |
+
+**Example:**
+
+```bash
+$ zap log -n 5
+  TIME        BRANCH       MESSAGE                          HASH
+  2m ago      feat/login   feat(auth): add OTP verificati…  a3f91c2
+  1h ago      main         fix: header alignment on mobile   b8e2d1f
+  3h ago      feat/login   chore: update deps               e7c3a9b
+```
+
+---
+
+### `zap config`
+
+View or update your local CLI configuration.
+
+```
+zap config [options]
+```
+
+| Flag | Description |
+|---|---|
+| `--show` | Show all current configuration |
+| `--check <mode>` | Set pre-push check behavior: `always`, `never`, or `ask` |
+| `--ai <state>` | Toggle AI commit messages by default: `on` or `off` |
+| `--warn-main <state>` | Toggle main/master branch warning: `on` or `off` |
+| `--reset` | Reset all configuration to defaults |
+
+**Examples:**
+
+```bash
+zap config --show                    # view current settings
+zap config --check always            # run checks before every push
+zap config --ai on                   # use AI by default
+zap config --warn-main off           # disable main branch warning
+zap config --reset                   # factory reset
+```
+
+---
+
+### `zap --undo`
+
+Soft-resets the last commit (`git reset --soft HEAD~1`) while keeping your changes staged. Safe and instant.
+
+```
+zap --undo
+```
+
+**Example:**
+
+```bash
+$ zap --undo
+  ◇  Resetting HEAD~1
+  ✓  Commit undone — changes are still staged
+  →  Run `zap` to recommit
+```
+
+---
 
 ### AI commit messages
 
-`zap --ai` reads your diff and generates a Conventional Commit message. The commit is never pushed until you approve it.
+`zap --ai` reads your diff and repo context (file tree, README, package.json) to generate a Conventional Commit message. The commit is never pushed until you approve, edit, or regenerate it.
 
 Provider order (first available wins):
 1. **Dashboard proxy** — if connected via `zap init`, uses the dashboard's AI key
 2. **`GROQ_API_KEY` env var** — direct Groq API access (self-hosted)
-3. **Heuristic** — smart guess from changed file names (always works offline)
+3. **Heuristic** — smart guess from changed file names (always works offline — never blocks a push)
+
+**Example:**
+
+```bash
+$ zap --ai
+  ◌  Scanning repo context...
+  ◌  Generating commit message with AI...
+
+  ○  AI suggestion:
+  │  feat(auth): add OTP verification step to login flow
+  │
+  ?  Accept · Edit · Regenerate
+```
+
+---
 
 ### Main branch protection
 
-Pushing to `main`/`master` triggers a warning. You can push directly, or zap creates a new branch and switches to it.
+Pushing to `main`/`master` prompts a warning. You can confirm the push, or zap creates a new branch and switches to it automatically.
+
+```
+zap config --warn-main off   # disable
+```
+
+---
 
 ### Pre-push checks
 
-If your project has `lint`, `test`, or `build` scripts, zap can run them before pushing:
-- `zap --check` — run once
-- `zap config --check always` — always run
-- `zap config --check ask` — ask each time (default)
-- `zap config --check never` — skip
+If your project has `lint`, `test`, or `build` scripts in `package.json`, zap can run them before every push.
+
+```
+zap config --check always    # always run checks
+zap config --check ask       # ask each time (default)
+zap config --check never     # skip checks
+zap --check                  # run checks once
+zap --skip-check             # skip checks once
+```
+
+---
 
 ### .gitignore auto-generation
 
-zap detects your project type and creates a `.gitignore` from bundled templates. Supports: **Node, Next.js, React, Python, Django, Laravel, Go, Rust, Java**. Won't overwrite an existing `.gitignore`.
+zap detects your project type and generates a `.gitignore` from bundled templates. Supports: **Node, Next.js, React, Python, Django, Laravel, Go, Rust, Java**. Won't overwrite an existing `.gitignore`.
+
+```
+zap init  (generated automatically)
+```
 
 ---
 
