@@ -65,7 +65,7 @@ const COMMANDS: CommandSection[] = [
   →  Done in 1.8s`,
     },
     options: [
-      { flag: "--ai", description: "Generate commit message with Groq AI" },
+      { flag: "--ai", description: "Generate commit message with AI" },
       { flag: "--dry-run", description: "Simulate the full flow without making changes" },
       { flag: "--check", description: "Force pre-push checks (lint/test/build)" },
       { flag: "--skip-check", description: "Skip pre-push checks for this push" },
@@ -77,20 +77,20 @@ const COMMANDS: CommandSection[] = [
     command: "zap --ai",
     title: "AI commit messages",
     description:
-      "Analyzes your repo context — file tree, changed files, README — and writes an accurate Conventional Commit using Groq AI. Accept, edit, or regenerate the suggestion.",
+      "Analyzes your repo context — file tree, changed files, README — and writes an accurate Conventional Commit with AI. Accept, edit, or regenerate the suggestion.",
     icon: <Sparkle size={20} weight="fill" />,
     usage: "zap --ai",
     example: {
       input: "$ zap --ai",
       output: `  ◌  Scanning repo context...
-  ◌  Generating commit message with Groq...
+  ◌  Generating commit message with AI...
 
   ○  AI suggestion:
   │  feat(auth): add OTP verification step to login flow
   │
   ?  Accept · Edit · Regenerate`,
     },
-    note: "AI commit messages require a Groq API key. Set GROQ_API_KEY in your environment or run zap init to configure.",
+    note: "AI commit messages require an API key. Set your key in the environment or run zap init to configure.",
   },
   {
     id: "undo",

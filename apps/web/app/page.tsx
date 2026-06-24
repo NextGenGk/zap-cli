@@ -27,7 +27,7 @@ const FEATURES = [
   {
     name: "AI commit messages",
     description:
-      "Reads your full repo context — file tree, package.json, README — and writes accurate Conventional Commits with Groq AI. Accept, edit, or regenerate.",
+      "Reads your full repo context — file tree, package.json, README — and writes accurate Conventional Commits with AI. Accept, edit, or regenerate.",
     icon: <Sparkle size={18} weight="bold" />,
     visual: AI_COMMIT_VISUAL,
   },

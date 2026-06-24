@@ -20,7 +20,7 @@ const LINES: TerminalLine[] = [
   { text: "  D  src/auth/old.jsx", color: "muted", delay: 120 },
   { text: "", delay: 250 },
   { text: "  ◌  Scanning repo context...", color: "muted", delay: 400 },
-  { text: "  ◌  Generating commit message with Groq...", color: "muted", delay: 700 },
+  { text: "  ◌  Generating commit message with AI...", color: "muted", delay: 700 },
   { text: "", delay: 200 },
   { text: "  ○  AI suggestion", color: "brand", delay: 300 },
   { text: "  │  feat(auth): add OTP verification step to login flow", color: "default", delay: 500 },
