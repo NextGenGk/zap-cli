@@ -1,6 +1,6 @@
 {
   "name": "zap-git",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Replace your entire git push workflow with one command: zap.",
   "author": "gaurav",
   "repository": {
@@ -28,7 +28,10 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "start": "node dist/index.js",
-    "test": "node --test dist/test/**/*.test.js"
+    "test": "node --test dist/test/**/*.test.js",
+    "preversion": "npm run build",
+    "prepublishOnly": "npm run build",
+    "postversion": "git push --follow-tags"
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",

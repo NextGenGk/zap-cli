@@ -8,7 +8,11 @@
   "scripts": {
     "cli:build": "npm run build --workspace=zap-git",
     "cli:test": "npm test --workspace=zap-git",
+    "cli:version": "npm version patch --workspace=zap-git",
+    "cli:publish": "npm publish --workspace=zap-git",
+    "cli:release": "npm run cli:version && npm run cli:publish",
     "web:dev": "npm run dev --workspace=zap-dashboard",
-    "web:build": "npm run build --workspace=zap-dashboard"
+    "web:build": "npm run build --workspace=zap-dashboard",
+    "web:version": "npm version patch --workspace=zap-dashboard"
   }
 }
