@@ -210,10 +210,17 @@ export default function DocsPage() {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <MarketingNavbar />
+    <div className="relative flex min-h-screen flex-col">
+      {/* Background Borders */}
+      <div className="pointer-events-none fixed inset-0 z-0 flex justify-center px-6">
+        <div className="w-full max-w-[1200px] border-l border-r border-dashed border-white/10" />
+      </div>
 
-      <main className="flex-1">
+      <div className="relative z-10">
+        <MarketingNavbar />
+      </div>
+
+      <main className="relative z-10 flex-1">
         <section className="px-6 py-16">
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 flex items-center gap-3">
@@ -223,6 +230,25 @@ export default function DocsPage() {
                   Everything you need to use zap, from setup to advanced configuration.
                 </p>
               </div>
+            </div>
+
+            <div className="lg:hidden mb-8">
+              <label htmlFor="mobile-nav" className="sr-only">Jump to section</label>
+              <select
+                id="mobile-nav"
+                value={activeId}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-fg-muted focus:outline-none focus:ring-2 focus:ring-brand"
+              >
+                {NAV_ITEMS.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label} {item.command} — {item.title}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="flex gap-10">
@@ -339,7 +365,9 @@ export default function DocsPage() {
         </section>
       </main>
 
-      <MarketingFooter />
+      <div className="relative z-10">
+        <MarketingFooter />
+      </div>
     </div>
   );
 }

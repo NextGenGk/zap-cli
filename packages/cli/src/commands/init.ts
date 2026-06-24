@@ -46,13 +46,21 @@ export async function initCommand(): Promise<void> {
   const existingRemote = await getRemoteUrl(cwd);
   if (existingRemote) {
     ui.log.success(`Remote: ${remoteUrlToHttps(existingRemote)}`);
+    const changeRemote = await ui.confirm("Change the remote URL?", false);
+    if (changeRemote) {
+      const url = await ui.text("Remote URL", undefined, remoteUrlToHttps(existingRemote));
+      const remoteName = await ui.text("Remote name", undefined, "origin");
+      await addRemote(url, cwd, remoteName);
+      ui.log.success(`Remote updated: ${remoteName} → ${remoteUrlToHttps(url)}`);
+    }
   } else {
     ui.log.step("No git remote configured yet");
     const wantsRemote = await ui.confirm("Add a GitHub remote now?", true);
     if (wantsRemote) {
       const url = await ui.text("Remote URL", undefined, "https://github.com/you/repo.git");
-      await addRemote(url, cwd);
-      ui.log.success(`Remote added: ${remoteUrlToHttps(url)}`);
+      const remoteName = await ui.text("Remote name", undefined, "origin");
+      await addRemote(url, cwd, remoteName);
+      ui.log.success(`Remote added: ${remoteName} → ${remoteUrlToHttps(url)}`);
     } else {
       ui.log.message(out.muted("You can add one later with: git remote add origin <url>"));
     }

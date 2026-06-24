@@ -31,7 +31,7 @@ export default async function DashboardPage() {
     <div className="flex flex-col">
       <Topbar title="Overview" description="Your push activity across all connected repos." />
 
-      <div className="flex flex-col gap-6 p-8">
+      <div className="flex flex-col gap-6 p-4 sm:p-8">
         {!isConnected && (
           <Card className="border-brand/30 bg-brand/5">
             <CardContent className="flex flex-col items-start justify-between gap-4 p-5 sm:flex-row sm:items-center">

@@ -15,7 +15,7 @@ export default async function OnboardingPage() {
     <div className="flex flex-col">
       <Topbar title="Welcome to Zap" description="Three quick steps and you're pushing with Zap." />
 
-      <div className="flex flex-col gap-6 p-8">
+      <div className="flex flex-col gap-6 p-4 sm:p-8">
         <Card className="w-full">
           <CardContent className="p-6">
             <OnboardingFlow appUrl={appUrl} />

@@ -17,7 +17,8 @@ program
   .version("0.1.0");
 
 program
-  .option("--ai", "generate the commit message with AI (Groq)")
+  .option("--ai", "generate the commit message with zap ai")
+  .option("--remote <name>", "git remote to push to (default: origin)")
   .option("--dry-run", "simulate the full flow without staging, committing, or pushing")
   .option("--check", "run pre-push checks (lint/test/build) before pushing")
   .option("--skip-check", "skip pre-push checks even if configured")
@@ -37,6 +38,7 @@ program
 
     await pushCommand({
       ai: !!options.ai,
+      remote: options.remote,
       dryRun: !!options.dryRun,
       check: !!options.check,
       skipCheck: !!options.skipCheck,

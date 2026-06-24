@@ -45,7 +45,7 @@ export function PreferencesForm({ initialCheckMode, initialAiDefault, initialWar
             </div>
             <input type="hidden" name="check_mode" value={checkMode} />
             <Select value={checkMode} onValueChange={(v) => setCheckMode(v as CheckMode)}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-28 sm:w-32">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

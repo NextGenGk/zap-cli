@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ensureUserRecord } from "@/lib/data/ensure-user";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { CommandPalette } from "@/components/dashboard/command-palette";
+import { SidebarToggle } from "@/components/dashboard/sidebar-toggle";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -20,7 +21,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex min-h-screen">
       <Sidebar email={data.user.email} />
-      <main className="flex-1 min-w-0 page-enter">{children}</main>
+      <main className="flex-1 min-w-0 page-enter">
+        <SidebarToggle />
+        {children}
+      </main>
       <CommandPalette />
     </div>
   );

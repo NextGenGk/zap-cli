@@ -26,9 +26,9 @@ export function PushTable({ events, emptyState }: { events: PushEventRow[]; empt
           <TableHead>Time</TableHead>
           <TableHead>Branch</TableHead>
           <TableHead>Commit</TableHead>
-          <TableHead>Files</TableHead>
-          <TableHead>Hash</TableHead>
-          <TableHead className="text-right">Repo</TableHead>
+          <TableHead className="hidden sm:table-cell">Files</TableHead>
+          <TableHead className="hidden md:table-cell">Hash</TableHead>
+          <TableHead className="hidden sm:table-cell text-right">Repo</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -50,9 +50,9 @@ export function PushTable({ events, emptyState }: { events: PushEventRow[]; empt
                 )}
               </span>
             </TableCell>
-            <TableCell className="text-fg-muted">{event.files_changed}</TableCell>
-            <TableCell className="font-mono text-xs text-fg-subtle">{event.commit_hash}</TableCell>
-            <TableCell className="text-right">
+            <TableCell className="hidden sm:table-cell text-fg-muted">{event.files_changed}</TableCell>
+            <TableCell className="hidden md:table-cell font-mono text-xs text-fg-subtle">{event.commit_hash}</TableCell>
+            <TableCell className="hidden sm:table-cell text-right">
               {event.repo_url && (
                 <a
                   href={`${remoteUrlToHttps(event.repo_url)}/commit/${event.commit_hash}`}

@@ -79,10 +79,14 @@ export async function getCurrentBranch(cwd?: string): Promise<string> {
   }
 }
 
-/** Returns the `origin` remote URL, or null if no remote is configured. */
-export async function getRemoteUrl(cwd?: string): Promise<string | null> {
+/** Returns the remote URL for a given remote name, or null if not found. */
+export async function getRemoteUrl(cwd?: string, remoteName?: string): Promise<string | null> {
   try {
     const remotes = await git(cwd).getRemotes(true);
+    if (remoteName) {
+      const remote = remotes.find((r) => r.name === remoteName);
+      return remote?.refs?.push || remote?.refs?.fetch || null;
+    }
     const origin = remotes.find((r) => r.name === "origin") ?? remotes[0];
     return origin?.refs?.push || origin?.refs?.fetch || null;
   } catch {
@@ -124,21 +128,21 @@ export async function commitChanges(message: string, cwd?: string): Promise<Comm
 }
 
 /**
- * Pushes the current branch to `origin`, setting upstream if needed.
+ * Pushes the current branch to a remote, setting upstream if needed.
  * Throws a `GitError` with a `hint` for common, recoverable failures
  * (no remote, rejected push, auth errors).
  */
-export async function pushBranch(branch: string, cwd?: string): Promise<void> {
+export async function pushBranch(branch: string, remote = "origin", cwd?: string): Promise<void> {
   try {
-    await git(cwd).push(["-u", "origin", branch]);
+    await git(cwd).push(["-u", remote, branch]);
   } catch (err) {
     const message = (err as Error).message || "";
 
     if (/No configured push destination|does not appear to be a git repository|fatal: 'origin'/i.test(message)) {
-      throw new GitError("No remote configured", "Run: git remote add origin https://github.com/you/repo.git");
+      throw new GitError("No remote configured", `Run: git remote add ${remote} https://github.com/you/repo.git`);
     }
     if (/rejected|fetch first|non-fast-forward/i.test(message)) {
-      throw new GitError("Push rejected (remote has changes)", `Pull first: git pull origin ${branch}`);
+      throw new GitError("Push rejected (remote has changes)", `Pull first: git pull ${remote} ${branch}`);
     }
     if (/Authentication failed|Permission denied|could not read Username/i.test(message)) {
       throw new GitError("Authentication failed", "Check your git credentials or SSH key for this remote.");
@@ -200,8 +204,8 @@ export async function initRepo(cwd?: string): Promise<void> {
   }
 }
 
-export async function addRemote(url: string, cwd?: string): Promise<void> {
-  await git(cwd).addRemote("origin", url);
+export async function addRemote(url: string, cwd?: string, remoteName = "origin"): Promise<void> {
+  await git(cwd).addRemote(remoteName, url);
 }
 
 /**

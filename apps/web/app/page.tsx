@@ -206,8 +206,8 @@ export default function LandingPage() {
         <div className="border-t border-dashed border-white/10 mx-auto max-w-[1200px] px-8" />
 
         {/* CTA */}
-        <section className="relative overflow-hidden px-6 py-24">
-          <div className="mx-auto flex max-w-4xl flex-col items-center gap-8 rounded-2xl border border-brand/15 bg-gradient-to-b from-brand/5 via-surface/60 to-surface/30 p-14 text-center relative overflow-hidden">
+        <section            className="relative overflow-hidden px-6 py-24">
+          <div className="mx-auto flex max-w-4xl flex-col items-center gap-8 rounded-2xl border border-brand/15 bg-gradient-to-b from-brand/5 via-surface/60 to-surface/30 p-8 sm:p-14 text-center relative overflow-hidden">
             <div 
               className="absolute inset-0 opacity-[0.03]" 
               style={{ 
