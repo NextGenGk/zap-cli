@@ -6,7 +6,7 @@ export function MarketingNavbar() {
   return (
     <header className="sticky top-0 z-40 bg-canvas/90 backdrop-blur-md uppercase text-[11px] tracking-[0.1em] font-medium text-fg-muted">
       <div className="w-full px-6">
-        <div className="mx-auto flex h-16 w-full max-w-[1200px] items-stretch border-b border-dashed border-border/60" style={{ borderBottomStyle: 'dashed' }}>
+        <div className="mx-auto flex h-16 w-full max-w-[1200px] items-stretch border-b border-l border-r border-dashed border-white/10">
           <Link href="#features" className="group hidden md:flex items-center justify-start px-8 border-r border-border/50 border-dashed hover:text-fg transition-colors">
             <TextRoll>Features</TextRoll>
           </Link>

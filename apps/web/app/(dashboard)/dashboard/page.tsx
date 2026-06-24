@@ -8,7 +8,11 @@ import { ActivityChart } from "@/components/dashboard/activity-chart";
 import { PushTable } from "@/components/dashboard/push-table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import type { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: "Dashboard",
+};
 export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();

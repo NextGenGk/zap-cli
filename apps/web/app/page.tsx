@@ -88,10 +88,17 @@ const STEPS = [
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <MarketingNavbar />
+    <div className="relative flex min-h-screen flex-col">
+      {/* Background Borders */}
+      <div className="pointer-events-none fixed inset-0 z-0 flex justify-center px-6">
+        <div className="w-full max-w-[1200px] border-l border-r border-dashed border-white/10" />
+      </div>
 
-      <main className="flex-1">
+      <div className="relative z-10">
+        <MarketingNavbar />
+      </div>
+
+      <main className="relative z-10 flex-1">
         {/* Hero */}
         <section className="relative overflow-hidden px-6 pt-20 pb-24">
 
@@ -117,10 +124,10 @@ export default function LandingPage() {
                 <CommandCopyBlock command="npm install -g zap-git" />
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link href="/signup" className="inline-flex items-center justify-center h-11 px-6 border border-dashed border-brand/40 rounded-xl bg-gradient-to-r from-brand/10 to-brand/5 hover:from-brand/15 hover:to-brand/10 transition-all text-brand uppercase tracking-widest text-[13px] font-medium whitespace-nowrap">
-                    <TextRoll>Get Started Free</TextRoll>
+                    <TextRoll>Get Started</TextRoll>
                   </Link>
                   <Link href="/docs" className="inline-flex items-center justify-center h-11 px-6 border border-dashed border-white/15 rounded-xl hover:bg-surface/50 transition-colors text-fg uppercase tracking-widest text-[13px] font-medium whitespace-nowrap" style={{ borderStyle: 'dashed' }}>
-                    <TextRoll>Read the docs</TextRoll>
+                    <TextRoll>Read Docs</TextRoll>
                   </Link>
                 </div>
               </div>
@@ -222,17 +229,19 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <Link href="/signup" className="inline-flex items-center justify-center h-11 px-6 border border-dashed border-brand/40 rounded-xl bg-gradient-to-r from-brand/10 to-brand/5 hover:from-brand/15 hover:to-brand/10 transition-all text-brand uppercase tracking-widest text-[13px] font-medium whitespace-nowrap">
-                <TextRoll>Get Started Free</TextRoll>
+                <TextRoll>Get Started</TextRoll>
               </Link>
               <Link href="/docs" className="inline-flex items-center justify-center h-11 px-6 border border-dashed border-white/15 rounded-xl bg-surface hover:bg-surface/80 transition-colors text-fg uppercase tracking-widest text-[13px] font-medium whitespace-nowrap" style={{ borderStyle: 'dashed' }}>
-                <TextRoll>Read the docs</TextRoll>
+                <TextRoll>Read Docs</TextRoll>
               </Link>
             </div>
           </div>
         </section>
       </main>
 
-      <MarketingFooter />
+      <div className="relative z-10">
+        <MarketingFooter />
+      </div>
     </div>
   );
 }

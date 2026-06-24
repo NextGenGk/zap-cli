@@ -5,7 +5,13 @@ import { ApiKeysManager } from "@/components/dashboard/api-keys-manager";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CommandCopyBlock } from "@/components/marketing/command-copy-block";
+import { getAppUrl } from "@/lib/utils";
 import type { ApiKeyRow, UserSettingsRow } from "@/lib/supabase/types";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Settings",
+};
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -24,7 +30,7 @@ export default async function SettingsPage() {
     warn_main: true,
   }) as Partial<UserSettingsRow>;
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.zap.dev";
+  const appUrl = getAppUrl();
 
   return (
     <div className="flex flex-col">

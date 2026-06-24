@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { CheckCircle, EnvelopeSimple, GithubLogo, Spinner } from "@phosphor-icons/react/dist/ssr";
+import { CheckCircle, EnvelopeSimple, Spinner } from "@phosphor-icons/react/dist/ssr";
+import { GithubIcon, GoogleIcon } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,11 +13,12 @@ interface AuthFormProps {
   mode: "login" | "signup";
   action: (formData: FormData) => Promise<AuthResult>;
   onGithub: () => Promise<void>;
+  onGoogle: () => Promise<void>;
 }
 
 const initialState: AuthResult = {};
 
-export function AuthForm({ mode, action, onGithub }: AuthFormProps) {
+export function AuthForm({ mode, action, onGithub, onGoogle }: AuthFormProps) {
   const [state, formAction, pending] = useActionState(async (_: AuthResult, formData: FormData) => {
     return action(formData);
   }, initialState);
@@ -43,21 +45,29 @@ export function AuthForm({ mode, action, onGithub }: AuthFormProps) {
 
   return (
     <div className="flex flex-col gap-6 rounded-(--radius-card) border border-border bg-surface p-6">
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col items-center gap-1 text-center">
         <h1 className="font-display text-xl font-bold text-fg">
           {mode === "login" ? "Sign in" : "Create your account"}
         </h1>
-        <p className="text-sm text-fg-muted">
-          {mode === "login" ? "Welcome back to your push history." : "Free forever for solo developers."}
-        </p>
+        {mode === "login" && (
+          <p className="text-sm text-fg-muted">Welcome back to your push history.</p>
+        )}
       </div>
 
-      <form action={onGithub}>
-        <Button type="submit" variant="secondary" className="w-full">
-          <GithubLogo size={18} />
-          Continue with GitHub
-        </Button>
-      </form>
+      <div className="flex flex-col gap-2">
+        <form action={onGithub} className="flex flex-col">
+          <Button type="submit" variant="secondary" className="w-full">
+            <GithubIcon />
+            Continue with GitHub
+          </Button>
+        </form>
+        <form action={onGoogle} className="flex flex-col">
+          <Button type="submit" variant="secondary" className="w-full">
+            <GoogleIcon />
+            Continue with Google
+          </Button>
+        </form>
+      </div>
 
       <div className="flex items-center gap-3">
         <Separator className="flex-1" />

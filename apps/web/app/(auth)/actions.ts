@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { ensureUserRecord } from "@/lib/data/ensure-user";
+import { getAppUrl } from "@/lib/utils";
 
 export interface AuthResult {
   error?: string;
@@ -36,7 +37,7 @@ export async function signUpWithPassword(formData: FormData): Promise<AuthResult
   }
 
   const supabase = await createClient();
-  const origin = (await headers()).get("origin") ?? process.env.NEXT_PUBLIC_APP_URL;
+  const origin = (await headers()).get("origin") ?? getAppUrl();
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -60,10 +61,25 @@ export async function signUpWithPassword(formData: FormData): Promise<AuthResult
 
 export async function signInWithGithub(): Promise<void> {
   const supabase = await createClient();
-  const origin = (await headers()).get("origin") ?? process.env.NEXT_PUBLIC_APP_URL;
+  const origin = (await headers()).get("origin") ?? getAppUrl();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "github",
+    options: { redirectTo: `${origin}/auth/callback?next=/onboarding` },
+  });
+
+  if (error || !data?.url) {
+    redirect("/login?error=oauth");
+  }
+  redirect(data.url);
+}
+
+export async function signInWithGoogle(): Promise<void> {
+  const supabase = await createClient();
+  const origin = (await headers()).get("origin") ?? getAppUrl();
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
     options: { redirectTo: `${origin}/auth/callback?next=/onboarding` },
   });
 

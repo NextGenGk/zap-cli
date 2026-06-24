@@ -9,9 +9,12 @@ const phudu = Phudu({
 });
 
 export const metadata: Metadata = {
-  title: "zap — push code, just type zap",
+  title: {
+    template: "%s - Zap",
+    default: "Zap - push code, just type zap",
+  },
   description:
-    "zap replaces your entire git push workflow with one command: stage, commit (with AI-generated messages), and push — with main-branch guardrails, pre-push checks, and one-step undo.",
+    "Zap replaces your entire git push workflow with one command: stage, commit (with AI-generated messages), and push — with main-branch guardrails, pre-push checks, and one-step undo.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

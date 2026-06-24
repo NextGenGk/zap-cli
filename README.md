@@ -47,6 +47,15 @@ zap --dry-run       # preview the whole flow, nothing committed/pushed
 zap --undo          # soft-reset the last commit, keep changes staged
 zap log             # view push history
 ```
+NEXT_PUBLIC_SUPABASE_URL=    # from Supabase Project Settings → API
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+GROQ_API_KEY=                # powers zap --ai for all users
+NEXT_PUBLIC_APP_URL=         # your Vercel URL (optional — falls back to https://zap-cli-web.vercel.app in prod)
+```
+
+3. Run `supabase/schema.sql` in your Supabase SQL editor
+4. Sign up, go to **Settings → API Keys → New key**, hand the key to your users
 
 ---
 
