@@ -28,7 +28,7 @@ export default async function AiUsagePage() {
     <div className="flex flex-col">
       <Topbar title="AI usage" description="How much zap --ai has done for you." />
 
-      <div className="flex flex-col gap-6 p-8">
+      <div className="flex flex-col gap-6 p-4 sm:p-8">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatsCard label="AI-assisted pushes" value={String(stats.totalAiPushes)} icon={<Sparkle size={16} weight="fill" />} />
           <StatsCard label="Total tokens" value={formatNumber(stats.totalTokens)} icon={<Coins size={16} weight="fill" />} />

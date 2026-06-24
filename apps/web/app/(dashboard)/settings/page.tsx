@@ -36,7 +36,7 @@ export default async function SettingsPage() {
     <div className="flex flex-col">
       <Topbar title="Settings" description="Manage your account, preferences, and API keys." />
 
-      <div className="flex flex-col gap-6 p-8">
+      <div className="flex flex-col gap-6 p-4 sm:p-8">
         <Card>
           <CardHeader>
             <CardTitle>Account</CardTitle>

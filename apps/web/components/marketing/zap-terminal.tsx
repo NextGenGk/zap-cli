@@ -56,7 +56,7 @@ export function ZapTerminal({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "w-full max-w-xl flex flex-col h-[480px] rounded-(--radius-card) border border-border bg-surface font-mono text-[13px] leading-relaxed shadow-none overflow-hidden",
+        "w-full max-w-xl flex flex-col h-[320px] sm:h-[400px] lg:h-[480px] rounded-(--radius-card) border border-border bg-surface font-mono text-[13px] leading-relaxed shadow-none overflow-hidden",
         className
       )}
     >

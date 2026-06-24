@@ -100,7 +100,7 @@ export async function generateCommitMessageViaGroq(diff: string): Promise<GroqCo
     const message = cleaned.split("\n").map((l) => l.trim()).filter(Boolean)[0] ?? "";
 
     if (!message) {
-      throw new GroqCommitError("Empty response from Groq model", "api-error");
+      throw new GroqCommitError("Empty response from AI model", "api-error");
     }
 
     const tokensUsed = completion.usage?.total_tokens ?? 0;
@@ -109,8 +109,8 @@ export async function generateCommitMessageViaGroq(diff: string): Promise<GroqCo
     if (err instanceof GroqCommitError) throw err;
     const msg = (err as Error).message ?? "";
     if (/timeout|ETIMEDOUT|ECONNABORTED/i.test(msg)) {
-      throw new GroqCommitError("Groq API request timed out", "timeout");
+      throw new GroqCommitError("AI request timed out", "timeout");
     }
-    throw new GroqCommitError(`Groq API request failed: ${msg}`, "api-error");
+    throw new GroqCommitError(`AI request failed: ${msg}`, "api-error");
   }
 }

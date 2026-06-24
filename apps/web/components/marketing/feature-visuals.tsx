@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 function MiniTerminal({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn("rounded-lg border border-border bg-canvas font-mono text-[11px] leading-relaxed p-3 space-y-1.5 h-full flex-1 flex flex-col", className)}>
+    <div className={cn("rounded-lg border border-border bg-canvas font-mono text-[10px] sm:text-[11px] leading-relaxed p-3 space-y-1.5 h-full flex-1 flex flex-col", className)}>
       {children}
     </div>
   );
@@ -42,7 +42,7 @@ export const AI_COMMIT_VISUAL = (
       </MiniLine>
     </div>
     <div className="border-t border-border pt-2 mt-auto">
-      <div className="text-[10px] uppercase tracking-wider text-brand mb-1">
+      <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-brand mb-1">
         AI suggestion
       </div>
       <div className="text-fg border-l-2 border-brand pl-2">
@@ -70,20 +70,20 @@ export const GIT_INIT_VISUAL = (
       <span className="text-success">✓</span>
       <span className="text-success">Identity configured</span>
     </MiniLine>
-    <MiniLine className="text-[9px] text-fg-muted ml-5 opacity-70">{'\u2192'} git config user.name &ldquo;Alex&rdquo;</MiniLine>
+    <MiniLine className="text-[8px] sm:text-[9px] text-fg-muted ml-5 opacity-70">{'\u2192'} git config user.name &ldquo;Alex&rdquo;</MiniLine>
     
     <MiniLine>
       <span className="text-fg-subtle">◇</span>
       <span className="text-fg-subtle">.gitignore generated</span>
     </MiniLine>
-    <MiniLine className="text-[9px] text-fg-muted ml-5 opacity-70">→ Detected Next.js project</MiniLine>
+    <MiniLine className="text-[8px] sm:text-[9px] text-fg-muted ml-5 opacity-70">→ Detected Next.js project</MiniLine>
     
     <MiniLine>
       <span className="text-fg-subtle">◇</span>
       <span className="text-fg-subtle">Dashboard connected</span>
     </MiniLine>
-    <MiniLine className="text-[9px] text-fg-muted ml-5 opacity-70">→ Link established</MiniLine>
-    <div className="border-t border-border pt-2 mt-auto text-[10px] text-fg-muted text-center">
+    <MiniLine className="text-[8px] sm:text-[9px] text-fg-muted ml-5 opacity-70">→ Link established</MiniLine>
+    <div className="border-t border-border pt-2 mt-auto text-[9px] sm:text-[10px] text-fg-muted text-center">
       Ready to zap →
     </div>
   </MiniTerminal>
@@ -96,7 +96,7 @@ export const UNDO_VISUAL = (
         <div className="w-2 h-2 rounded-full border border-border-strong" />
         <div className="w-px h-6 bg-border" />
       </div>
-      <span className="text-fg-muted text-[10px] leading-none mb-3">
+      <span className="text-fg-muted text-[9px] sm:text-[10px] leading-none mb-3">
         HEAD~1 fix: header alignment
       </span>
     </div>
@@ -107,15 +107,15 @@ export const UNDO_VISUAL = (
         <div className="w-2 h-2 rounded-full border border-border-strong" />
       </div>
       <div className="flex flex-col gap-2">
-        <span className="text-fg-muted line-through text-[10px] leading-none">
+        <span className="text-fg-muted line-through text-[9px] sm:text-[10px] leading-none">
           HEAD  feat: add login
         </span>
-        <span className="text-fg text-[10px] leading-none">
+        <span className="text-fg text-[9px] sm:text-[10px] leading-none">
           HEAD  unstaged changes
         </span>
       </div>
     </div>
-    <div className="border-t border-border pt-2 mt-auto text-warning text-[10px]">
+    <div className="border-t border-border pt-2 mt-auto text-warning text-[9px] sm:text-[10px]">
       ← zap --undo
     </div>
   </MiniTerminal>
@@ -127,20 +127,20 @@ export const CHECKS_VISUAL = (
       <div className="flex items-center gap-2">
         <div className="w-1.5 h-1.5 rounded-full bg-success" />
         <span>lint</span>
-        <span className="ml-auto text-[10px] text-success">pass</span>
+        <span className="ml-auto text-[9px] sm:text-[10px] text-success">pass</span>
       </div>
       <div className="flex items-center gap-2">
         <div className="w-1.5 h-1.5 rounded-full bg-success" />
         <span>test</span>
-        <span className="ml-auto text-[10px] text-success">pass</span>
+        <span className="ml-auto text-[9px] sm:text-[10px] text-success">pass</span>
       </div>
       <div className="flex items-center gap-2">
         <div className="w-1.5 h-1.5 rounded-full bg-success" />
         <span>build</span>
-        <span className="ml-auto text-[10px] text-success">pass</span>
+        <span className="ml-auto text-[9px] sm:text-[10px] text-success">pass</span>
       </div>
     </div>
-    <div className="border-t border-border pt-2 mt-auto text-success text-[10px] text-center">
+    <div className="border-t border-border pt-2 mt-auto text-success text-[9px] sm:text-[10px] text-center">
       ✓ All checks passed
     </div>
   </MiniTerminal>
@@ -155,7 +155,7 @@ export const GITIGNORE_VISUAL = (
     <div className="ml-3 text-fg-muted line-through">├── .next/</div>
     <div className="ml-3 text-fg-muted line-through">├── .env.local</div>
     <div className="ml-3 text-success">└── README.md</div>
-    <div className="border-t border-border pt-1.5 mt-auto text-[10px] text-fg-subtle text-center">
+    <div className="border-t border-border pt-1.5 mt-auto text-[9px] sm:text-[10px] text-fg-subtle text-center">
       .gitignore · 12 entries auto-detected
     </div>
   </MiniTerminal>
@@ -175,7 +175,7 @@ export const DASHBOARD_VISUAL = (
         />
       ))}
     </div>
-    <div className="mt-2 flex justify-between text-[9px] text-fg-subtle">
+    <div className="mt-2 flex justify-between text-[8px] sm:text-[9px] text-fg-subtle">
       <span>Mon</span>
       <span>Tue</span>
       <span>Wed</span>
@@ -184,7 +184,7 @@ export const DASHBOARD_VISUAL = (
       <span>Sat</span>
       <span>Sun</span>
     </div>
-    <div className="mt-2 flex justify-between border-t border-border pt-2 text-[10px]">
+    <div className="mt-2 flex justify-between border-t border-border pt-2 text-[9px] sm:text-[10px]">
       <span className="text-brand">4.2k pushes</span>
       <span className="text-fg-muted">92% AI</span>
     </div>
@@ -215,7 +215,7 @@ export const INSTALL_VISUAL = (
     <div className="border-t border-border pt-2 mt-auto">
       <MiniLine className="text-fg">
         <span className="text-brand">⚡</span>
-        <span className="text-[10px]">zap --help for available commands</span>
+        <span className="text-[9px] sm:text-[10px]">zap --help for available commands</span>
       </MiniLine>
     </div>
   </MiniTerminal>
@@ -234,27 +234,27 @@ export const INIT_VISUAL = (
     <div className="border-t border-border/50 my-1" />
     <MiniLine>
       <span className="text-success">✓</span>
-      <span className="text-success text-[10px]">Initialized empty Git repo</span>
+      <span className="text-success text-[9px] sm:text-[10px]">Initialized empty Git repo</span>
     </MiniLine>
-    <MiniLine className="text-[9px] text-fg-muted ml-5 opacity-70">
+    <MiniLine className="text-[8px] sm:text-[9px] text-fg-muted ml-5 opacity-70">
       → git init
     </MiniLine>
     <MiniLine>
       <span className="text-success">✓</span>
-      <span className="text-success text-[10px]">Identity set</span>
+      <span className="text-success text-[9px] sm:text-[10px]">Identity set</span>
     </MiniLine>
-    <MiniLine className="text-[9px] text-fg-muted ml-5 opacity-70">
+    <MiniLine className="text-[8px] sm:text-[9px] text-fg-muted ml-5 opacity-70">
       → git config user.name &quot;You&quot;
     </MiniLine>
     <MiniLine>
       <span className="text-success">✓</span>
-      <span className="text-success text-[10px]">.gitignore generated</span>
+      <span className="text-success text-[9px] sm:text-[10px]">.gitignore generated</span>
     </MiniLine>
     <MiniLine>
       <span className="text-success">✓</span>
-      <span className="text-success text-[10px]">Dashboard linked</span>
+      <span className="text-success text-[9px] sm:text-[10px]">Dashboard linked</span>
     </MiniLine>
-    <div className="border-t border-border pt-2 mt-auto text-[10px] text-fg-muted text-center">
+    <div className="border-t border-border pt-2 mt-auto text-[9px] sm:text-[10px] text-fg-muted text-center">
       Ready in 1.2s →
     </div>
   </MiniTerminal>
@@ -271,14 +271,14 @@ export const PUSH_VISUAL = (
       <span>Analyzing repo context...</span>
     </MiniLine>
     <div className="border-t border-border/50 my-1" />
-    <div className="text-[10px] uppercase tracking-wider text-brand mb-1">
+    <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-brand mb-1">
       AI commit message
     </div>
-    <div className="text-fg border-l-2 border-brand pl-2 text-[10px] leading-relaxed mb-2">
+    <div className="text-fg border-l-2 border-brand pl-2 text-[9px] sm:text-[10px] leading-relaxed mb-2">
       feat(auth): add OTP verification<br />
       step to login flow
     </div>
-    <MiniLine className="text-fg text-[10px]">
+    <MiniLine className="text-fg text-[9px] sm:text-[10px]">
       <span className="text-fg-muted">Accept</span>
       <span className="text-fg-subtle">|</span>
       <span className="text-brand">Edit</span>

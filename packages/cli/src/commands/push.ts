@@ -24,7 +24,7 @@ import {
   DashboardAiError,
   type SyncCredentials,
 } from "../lib/supabase.js";
-import { detectCheckScripts, runPrePushChecks } from "../lib/lint.js";
+import { detectCheckScripts, runPrePushChecks, type CheckScript } from "../lib/lint.js";
 import * as out from "../ui/output.js";
 import * as ui from "../ui/prompts.js";
 import { ensureOrUpdateGitignore } from "../lib/gitignore.js";
@@ -32,6 +32,7 @@ import { randomUUID } from "node:crypto";
 
 export interface PushOptions {
   ai?: boolean;
+  remote?: string;
   dryRun?: boolean;
   check?: boolean;
   skipCheck?: boolean;
@@ -153,6 +154,7 @@ export async function pushCommand(options: PushOptions = {}): Promise<void> {
   }
 
   // 7. Stage, commit, push
+  const remoteName = options.remote || "origin";
   try {
     await stageAll(cwd);
     const commit = await commitChanges(commitMessage, cwd);
@@ -160,16 +162,16 @@ export async function pushCommand(options: PushOptions = {}): Promise<void> {
     const spin = ui.spinner();
     spin.start(`Pushing to ${branch}...`);
     try {
-      await pushBranch(branch, cwd);
+      await pushBranch(branch, remoteName, cwd);
     } catch (err) {
       spin.stop(`Push failed`);
       throw err;
     }
-    spin.stop(`Pushed to ${branch}`);
+    spin.stop(`Pushed to ${remoteName}/${branch}`);
 
     // 8. Success output
     const durationMs = Date.now() - start;
-    const remote = await getRemoteUrl(cwd);
+    const remote = await getRemoteUrl(cwd, remoteName);
     const details = [`commit ${commit.hash}`];
     if (remote) {
       details.push(`${remoteUrlToHttps(remote)}/commit/${commit.hash}`);
@@ -258,7 +260,7 @@ async function runAiFlow(
       : diff;
 
     const spin = ui.spinner();
-    spin.start("Generating commit message with Groq...");
+    spin.start("Generating commit message with zap ai...");
 
     let generated: { message: string; tokensUsed: number; model: string } | null = null;
     let failureHint: string | null = null;
@@ -332,8 +334,15 @@ async function runChecksIfNeeded(
 ): Promise<boolean> {
   if (options.skipCheck) return true;
 
-  const scripts = detectCheckScripts(cwd);
-  if (scripts.length === 0) return true;
+  const scripts: CheckScript[] = detectCheckScripts(cwd);
+  if (scripts.length === 0) {
+    if (options.check) {
+      console.log(out.warningBlock("No check scripts found", "No lint, test, or build scripts detected in package.json. Use --skip-check to silence."));
+    }
+    return true;
+  }
+
+  const scriptNames = scripts.map((s) => s.name);
 
   let shouldRun = false;
   if (options.check) shouldRun = true;
@@ -342,21 +351,21 @@ async function runChecksIfNeeded(
   else {
     // "ask"
     if (dry) {
-      console.log(out.info(`[DRY RUN] Would ask to run checks: ${scripts.join(", ")}`));
+      console.log(out.info(`[DRY RUN] Would ask to run checks: ${scriptNames.join(", ")}`));
       return true;
     }
-    shouldRun = await ui.confirm(`Run pre-push checks (${scripts.join(", ")})?`, true);
+    shouldRun = await ui.confirm(`Run pre-push checks (${scriptNames.join(", ")})?`, true);
   }
 
   if (!shouldRun) return true;
 
   if (dry) {
-    console.log(out.info(`[DRY RUN] Would run: ${scripts.join(", ")}`));
+    console.log(out.info(`[DRY RUN] Would run: ${scriptNames.join(", ")}`));
     return true;
   }
 
   const spin = ui.spinner();
-  spin.start(`Running checks: ${scripts.join(", ")}...`);
+  spin.start(`Running checks: ${scriptNames.join(", ")}...`);
   const results = await runPrePushChecks(cwd);
   const failed = results.find((r) => !r.passed);
 

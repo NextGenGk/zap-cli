@@ -69,7 +69,7 @@ export default async function HistoryPage({
         description={`${filteredEvents.length} push${filteredEvents.length === 1 ? "" : "es"}${branchFilter ? ` on ${branchFilter}` : ""}`}
       />
 
-      <div className="flex flex-col gap-4 p-8">
+      <div className="flex flex-col gap-4 p-4 sm:p-8">
         {branches.length > 0 && (
           <div className="flex flex-wrap items-center gap-2">
             <FilterBadge label="All branches" href="/history" active={!branchFilter} />

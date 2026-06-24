@@ -102,8 +102,8 @@ export function ApiKeysManager({ apiKeys }: { apiKeys: ApiKeyRow[] }) {
             <TableHeader>
               <TableRow>
                 <TableHead>Label</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Last used</TableHead>
+                <TableHead className="hidden sm:table-cell">Created</TableHead>
+                <TableHead className="hidden md:table-cell">Last used</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -112,8 +112,8 @@ export function ApiKeysManager({ apiKeys }: { apiKeys: ApiKeyRow[] }) {
               {[...activeKeys, ...revokedKeys].map((key) => (
                 <TableRow key={key.id}>
                   <TableCell className="text-fg">{key.label}</TableCell>
-                  <TableCell className="text-fg-muted">{timeAgo(key.created_at)}</TableCell>
-                  <TableCell className="text-fg-muted">{key.last_used_at ? timeAgo(key.last_used_at) : "Never"}</TableCell>
+                  <TableCell className="hidden sm:table-cell text-fg-muted">{timeAgo(key.created_at)}</TableCell>
+                  <TableCell className="hidden md:table-cell text-fg-muted">{key.last_used_at ? timeAgo(key.last_used_at) : "Never"}</TableCell>
                   <TableCell>
                     {key.revoked_at ? <Badge variant="danger">Revoked</Badge> : <Badge variant="success">Active</Badge>}
                   </TableCell>
