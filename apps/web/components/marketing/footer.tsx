@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 const footerLinks = {
-  Product: [
+  Pages: [
     { label: "Features", href: "#features" },
     { label: "How it works", href: "#how-it-works" },
     { label: "Pricing", href: "#pricing" },
@@ -58,10 +58,10 @@ export function MarketingFooter() {
 
         <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-2 px-8 py-6 sm:flex-row sm:justify-between border-y border-dashed border-border/50">
             <p className="text-xs text-fg-subtle">
-              &copy; {new Date().getFullYear()} zap. All rights reserved.
+              &copy; {new Date().getFullYear()} Zap. All rights reserved.
             </p>
             <p className="text-xs text-fg-subtle">
-              Push code. Just type zap.
+              Push code. Just type Zap.
             </p>
           </div>
       </div>

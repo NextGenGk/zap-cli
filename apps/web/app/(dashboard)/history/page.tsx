@@ -6,6 +6,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { PushEventRow } from "@/lib/supabase/types";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Push History",
+};
 
 const PAGE_SIZE = 100;
 

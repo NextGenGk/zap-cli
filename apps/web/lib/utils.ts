@@ -39,3 +39,17 @@ export function truncate(text: string, max: number): string {
   if (text.length <= max) return text;
   return `${text.slice(0, max - 1)}…`;
 }
+
+/**
+ * Returns the public-facing app URL, with an environment-aware default.
+ *
+ * In dev builds the fallback is http://localhost:3000 (the Next.js default).
+ * In production the fallback is https://zap-cli-web.vercel.app so the dashboard never
+ * displays a localhost URL even if the NEXT_PUBLIC_APP_URL env var is missing.
+ */
+export function getAppUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_APP_URL ??
+    (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://zap-cli-web.vercel.app")
+  );
+}

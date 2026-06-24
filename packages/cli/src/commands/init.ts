@@ -85,8 +85,8 @@ export async function initCommand(): Promise<void> {
     if (wantsDashboard) {
       const url = await ui.text(
         "Dashboard URL",
-        config.zapSupabaseUrl || "https://app.zap.dev",
-        "https://app.zap.dev"
+        config.zapSupabaseUrl || "https://zap-cli-web.vercel.app",
+        "https://zap-cli-web.vercel.app"
       );
       const apiKey = await ui.text("Paste your API key (from Settings → API Keys)");
       setConfigValue("zapSupabaseUrl", url);

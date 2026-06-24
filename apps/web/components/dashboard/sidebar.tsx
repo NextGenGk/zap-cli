@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   SquaresFour,
@@ -27,7 +27,7 @@ export function Sidebar({ email }: { email?: string | null }) {
     <aside className="sticky top-0 flex h-screen shrink-0 w-60 flex-col border-r border-border bg-surface px-4 py-5">
       <Link href="/dashboard" className="mb-8 flex items-center gap-2.5 px-2">
         <Image src="/zap.svg" alt="Zap Logo" width={28} height={28} />
-        <span className="font-display text-lg font-bold tracking-widest text-fg">ZAP</span>
+        <span className="font-display text-2xl font-bold tracking-widest text-fg">ZAP</span>
       </Link>
 
       <nav className="flex flex-1 flex-col gap-1">
@@ -52,10 +52,7 @@ export function Sidebar({ email }: { email?: string | null }) {
 
       <div className="flex flex-col gap-2 border-t border-border pt-4">
         {email && <p className="truncate px-3 text-xs text-fg-subtle">{email}</p>}
-        <div className="flex items-center justify-between px-3 text-xs text-fg-subtle">
-          <span>Quick nav</span>
-          <kbd className="rounded border border-border bg-surface-elevated px-1.5 py-0.5 font-mono">⌘K</kbd>
-        </div>
+
         <form action={signOut}>
           <button
             type="submit"

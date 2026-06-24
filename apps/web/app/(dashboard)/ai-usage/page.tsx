@@ -7,6 +7,11 @@ import { TokenUsageChart } from "@/components/dashboard/token-usage-chart";
 import { PushTable } from "@/components/dashboard/push-table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { formatNumber } from "@/lib/utils";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "AI Usage",
+};
 
 export default async function AiUsagePage() {
   const supabase = await createClient();
