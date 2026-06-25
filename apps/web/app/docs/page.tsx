@@ -34,7 +34,7 @@ const COMMANDS: CommandSection[] = [
     command: "zap init",
     title: "Setup wizard",
     description:
-      "Interactive first-time setup. Creates a git repo if needed, sets your identity, generates .gitignore from your project stack, and connects to your dashboard.",
+      "Interactive first-time setup. Creates a git repo if needed, sets your identity, configures your git remote (add or update URL), generates .gitignore from your project stack, and connects to your dashboard.",
     icon: <FolderSimplePlus size={20} weight="fill" />,
     usage: "zap init",
     example: {
@@ -46,7 +46,7 @@ const COMMANDS: CommandSection[] = [
   ✓  Dashboard linked
   →  Ready in 1.2s`,
     },
-    note: "zap init is interactive. It will prompt you for any information it needs. Re-run anytime to reconnect a different dashboard.",
+    note: "zap init is interactive. It will prompt you for any information it needs. Re-run anytime to reconnect a different dashboard or update your remote URL.",
   },
   {
     id: "push",
