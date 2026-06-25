@@ -205,7 +205,13 @@ export async function initRepo(cwd?: string): Promise<void> {
 }
 
 export async function addRemote(url: string, cwd?: string, remoteName = "origin"): Promise<void> {
-  await git(cwd).addRemote(remoteName, url);
+  const remotes = await git(cwd).getRemotes(true);
+  const exists = remotes.some((r) => r.name === remoteName);
+  if (exists) {
+    await git(cwd).raw(["remote", "set-url", remoteName, url]);
+  } else {
+    await git(cwd).addRemote(remoteName, url);
+  }
 }
 
 /**

@@ -87,7 +87,7 @@ Shows your last 20 pushes. Fetches from dashboard if connected, otherwise reads 
 
 ### `zap init`
 
-First-time setup: git identity, remote, `.gitignore`, dashboard connection, AI toggle.
+First-time setup: git identity, remote (add or update URL), `.gitignore`, dashboard connection, AI toggle.
 
 ### `zap config`
 
